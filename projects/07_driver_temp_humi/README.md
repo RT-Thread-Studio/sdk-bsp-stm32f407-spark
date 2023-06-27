@@ -133,6 +133,5 @@ msh >[D/main] humidity   : 0.0 %
 
 ## 引用参考
 
-- 《RT-Thread 编程指南》: docs/RT-Thread 编程指南.pdf
-- 《I2C 设备应用笔记》: docs/AN0003-RT-Thread-I2C 设备应用笔记
-- 《aht10 软件包介绍》：[https://github.com/RT-Thread-packages/aht10](https://github.com/RT-Thread-packages/aht10)
+- 设备与驱动：[I2C 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/i2c/i2c)
+- aht10 软件包：[https://github.com/RT-Thread-packages/aht10](https://github.com/RT-Thread-packages/aht10)

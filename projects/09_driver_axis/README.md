@@ -164,7 +164,6 @@ int main(void)
 
 ## 引用参考
 
-- 《RT-Thread 编程指南》: docs/RT-Thread 编程指南.pdf
-- 《I2C 设备应用笔记》: docs/AN0003-RT-Thread-I2C 设备应用笔记
-- 《icm20608 软件包介绍》：[https://github.com/RT-Thread-packages/icm20608](https://github.com/RT-Thread-packages/icm20608)
+- 设备与驱动：[PIN 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/pin/pin)
+- icm20608 软件包：[https://github.com/RT-Thread-packages/icm20608](https://github.com/RT-Thread-packages/icm20608)
 

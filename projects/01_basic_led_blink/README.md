@@ -103,5 +103,5 @@ int main(void)
 
 ## 引用参考
 
-- 《通用GPIO设备应用笔记》: docs/AN0002-RT-Thread-通用 GPIO 设备应用笔记.pdf
-- 《RT-Thread 编程指南》: docs/RT-Thread 编程指南.pdf
+- 设备与驱动：[PIN 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/pin/pin)
+
