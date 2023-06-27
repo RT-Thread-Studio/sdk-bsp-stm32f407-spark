@@ -1,0 +1,380 @@
+board:
+  buy_url_cn: N/A
+  buy_url_global: N/A
+  debug_interface: SWD
+  debugger: ST-LINK
+  description_en: Spark-1 is an embedded RTOS development learning board designed for engineers and college students.
+  description_zh: 星火一号是一款专为工程师和高校学生设计的嵌入式 RTOS 开发学习板。
+  emulator_machine: ''
+  large_image: docs/images/board.jpg
+  name: STM32F407-RT-SPARK
+  price_cn: N/A CNY
+  price_global: N/A USD
+  sale_contact_cn: N/A
+  sale_contact_global: N/A
+  small_image: docs/images/board-small.jpg
+  vendor: STMicroelectronics
+  version: 1.0.0
+chip:
+  chip_name: STM32F407ZG
+  clock_source: HSE
+  device_vendor: STMicroelectronics
+  family_name: STM32
+  series_name: STM32F4
+  source_freq: '8000000'
+  sub_series_name: STM32F407
+  target_freq: '240000000'
+  tx_name: PA9
+  rx_name: PA10
+  uart_name: UART1
+docs:
+- category: other
+  file: docs/SCH_LearnBoard_IoT_V0_0.pdf
+  title: SCH_LearnBoard_IoT_V0_0
+features:
+- 'On-chip Flash:1024KB'
+- 'SRAM:196KB (including 64KB CCM)'
+- '8MB NorFlash'
+- 'SD Card holder'
+- 'STlink'
+- 'RW007: SPI high-speed WIFI'
+- 'USB'
+- 'RS485'
+- 'CAN'
+- 'more...'
+features_zh:
+- 'Flash:1024KB'
+- 'SRAM:196KB (包括 64KB 的 CCM)'
+- '8MB NorFlash'
+- 'SD 卡座'
+- 'STlink'
+- 'RW007 SPI 高速 WIFI'
+- 'USB'
+- 'RS485'
+- 'CAN'
+- '更多...'
+pkg_type: Board_Support_Packages
+pkg_vendor: rtt
+pkg_version: 0.1.0
+template_projects:
+- builtin_files:
+  - source_path_offset: projects/01_basic_led_blink
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+  project_description: 描述
+  project_name: rt-spark
+  project_type: rt-thread|@full|@4.1.1
+example_projects:
+- project_name: 01_basic_led_blink
+  project_description: LED 闪烁示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/01_basic_led_blink
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 02_basic_rgb_led
+  project_description: RGB LED 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/02_basic_rgb_led
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 03_basic_key
+  project_description: 按键示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/03_basic_key
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 04_basic_beep_led
+  project_description: 蜂鸣器示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/04_basic_beep_led
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_basic_ir
+  project_description: 红外遥控示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_basic_ir
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 06_driver_lcd
+  project_description: LCD 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/06_driver_lcd
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 07_driver_temp_humi
+  project_description: 温湿度传感器示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/07_driver_temp_humi
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 08_driver_als_ps
+  project_description: 接近与光强传感器示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/08_driver_als_ps
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 09_driver_axis
+  project_description: 六轴传感器示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/09_driver_axis
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 10_component_usb_mouse
+  project_description: USB 鼠标示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/10_component_usb_mouse
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+yaml_version: 3
