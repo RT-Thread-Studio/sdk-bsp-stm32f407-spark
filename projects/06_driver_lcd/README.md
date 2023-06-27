@@ -66,5 +66,4 @@ static int lcd_show_all_round(void)
 
 ## 引用参考
 
-- 《SPI 设备应用笔记》 : docs/AN0004-RT-Thread-SPI 设备应用笔记. pdf
-- 《RT-Thread 编程指南》 : docs/RT-Thread 编程指南. pdf
+- 设备与驱动：[SPI 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/spi/spi)

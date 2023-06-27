@@ -130,7 +130,6 @@ msh >[D/main] object is not proximity of sensor.
 
 ## 引用参考
 
-- 《RT-Thread 编程指南》: docs/RT-Thread 编程指南.pdf
-- 《I2C 设备应用笔记》: docs/AN0003-RT-Thread-I2C 设备应用笔记
-- 《ap3216c 软件包介绍》：[https://github.com/RT-Thread-packages/ap3216c](https://github.com/RT-Thread-packages/ap3216c)
+- 设备与驱动：[I2C 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/i2c/i2c)
+- ap3216c 软件包：[https://github.com/RT-Thread-packages/ap3216c](https://github.com/RT-Thread-packages/ap3216c)
 

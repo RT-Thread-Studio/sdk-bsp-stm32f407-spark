@@ -80,3 +80,12 @@ int main(void)
 [D/main] KEY0 pressed!
 [D/main] KEY0 pressed!
 ```
+
+## 注意事项
+
+暂无。
+
+## 引用参考
+
+- 设备与驱动：[PIN 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/pin/pin)
+

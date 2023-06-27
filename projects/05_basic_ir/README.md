@@ -15,6 +15,7 @@
 如上图所示，红外发射脚 EMISSION 接单片机引脚 PB1，红外接收头引脚 RECEPTION 接单片机引脚 PF8（TIM3_CH4 通道）。红外传感器在开发板中的位置如下图所示：
 
 ![红外位置](figures/board.png)
+
 ## 软件说明
 
 红外例程的示例代码位于 /examples/05_basic_ir/applications/main.c 中，主要流程：选择 NEC 解码器，初始化 GPIO 引脚。然后在 while 循环中扫描按键、打印输出接收到的红外数据，当 KEY0 按下后将会把最近一次接收到的红外数据通过红外发射头发送出去。
@@ -85,6 +86,7 @@ rt_err_t infrared_write(const char* decoder_name, struct infrared_decoder_data* 
 ```
 
 ## 运行
+
 ### 编译 & 下载
 
 - RT-Thread Studio：通过 RT-Thread Studio 导入工程，执行编译。
@@ -139,5 +141,5 @@ rt_err_t infrared_write(const char* decoder_name, struct infrared_decoder_data* 
 
 ## 引用参考
 
-- 《通用GPIO设备应用笔记》: docs/AN0002-RT-Thread-通用 GPIO 设备应用笔记.pdf
-- 《RT-Thread 编程指南》: docs/RT-Thread 编程指南.pdf
+- 设备与驱动：[PIN 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/pin/pin)
+- 红外框架：[https://github.com/RT-Thread-packages/infrared_framework](https://github.com/RT-Thread-packages/infrared_framework)
