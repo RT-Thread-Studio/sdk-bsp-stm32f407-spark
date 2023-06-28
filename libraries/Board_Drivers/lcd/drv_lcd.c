@@ -16,7 +16,6 @@
 #include "string.h"
 #include "drv_lcd.h"
 #include "drv_lcd_font.h"
-#include <rttlogo.h>
 
 #define DRV_DEBUG
 #define LOG_TAG "drv.lcd"
@@ -1237,22 +1236,22 @@ int drv_lcd_init(void)
     hsram1.Init.PageSize = FSMC_PAGE_SIZE_NONE;
     // /* Timing */
 
-    read_timing.AddressSetupTime = 0XF;	 //地址建立时间（ADDSET）为16个HCLK 1/168M=6ns*16=96ns	
-    read_timing.AddressHoldTime = 0x00;	 //地址保持时间（ADDHLD）模式A未用到	
+    read_timing.AddressSetupTime = 0XF;	 //地址建立时间（ADDSET）为16个HCLK 1/168M=6ns*16=96ns
+    read_timing.AddressHoldTime = 0x00;	 //地址保持时间（ADDHLD）模式A未用到
     read_timing.DataSetupTime = 60;			//数据保存时间为60个HCLK	=6*60=360ns
     read_timing.BusTurnAroundDuration = 0x00;
     read_timing.CLKDivision = 0x00;
     read_timing.DataLatency = 0x00;
-    read_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A 
+    read_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A
 
 
-    write_timing.AddressSetupTime =9;	      //地址建立时间（ADDSET）为9个HCLK =54ns 
-    write_timing.AddressHoldTime = 0x00;	 //地址保持时间（A		
+    write_timing.AddressSetupTime =9;	      //地址建立时间（ADDSET）为9个HCLK =54ns
+    write_timing.AddressHoldTime = 0x00;	 //地址保持时间（A
     write_timing.DataSetupTime = 8;		 //数据保存时间为6ns*9个HCLK=54ns
     write_timing.BusTurnAroundDuration = 0x00;
     write_timing.CLKDivision = 0x00;
     write_timing.DataLatency = 0x00;
-    write_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A 
+    write_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A
 
     if (HAL_SRAM_Init(&hsram1, &read_timing, &write_timing) != HAL_OK)
     {
@@ -1488,31 +1487,3 @@ void lcd_fill_test(int argc, void **argv)
 }
 MSH_CMD_EXPORT(lcd_fill_test, lcd fill test for mcu lcd);
 #endif
-
-int lcd_show_all_round(void)
-{
-    lcd_clear(WHITE);
-
-   /* show RT-Thread logo */
-    lcd_show_image(0, 0, 240, 69, image_rttlogo);
-
-    /* set the background color and foreground color */
-    lcd_set_color(WHITE, BLACK);
-
-    /* show some string on lcd */
-    lcd_show_string(10, 69, 16, "Hello, RT-Thread!");
-    lcd_show_string(10, 69+16, 24, "RT-Thread");
-    lcd_show_string(10, 69+16+24, 32, "RT-Thread");
-
-    /* draw a line on lcd */
-    lcd_draw_line(0, 69+16+24+32, 240, 69+16+24+32);
-
-    /* draw a concentric circles */
-    lcd_draw_point(120, 194);
-    for (int i = 0; i < 46; i += 4)
-    {
-        lcd_draw_circle(120, 194, i);
-    }
-    return 0;
-}
-INIT_APP_EXPORT(lcd_show_all_round);

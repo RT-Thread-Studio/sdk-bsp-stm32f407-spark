@@ -51,7 +51,6 @@ int main(void)
 
     do
     {
-
         /* 获得组编号 */
         group_current = count % group_num;
 

@@ -12,36 +12,37 @@
 #include <rtdevice.h>
 #include <board.h>
 
+#include <drv_lcd.h>
+#include <rttlogo.h>
+
 #define DBG_TAG "main"
 #define DBG_LVL         DBG_LOG
 #include <rtdbg.h>
 
-/* 配置 LED 灯引脚 */
-#define PIN_LED_B              GET_PIN(F, 11)      // PE7 :  LED_R        --> LED
-#define PIN_LED_R              GET_PIN(F, 12)      // PE7 :  LED_R        --> LED
-//#define PIN_LED_MATRIX_EN      GET_PIN(F, 2)
-void show();
 int main(void)
 {
-    unsigned int count = 1;
+    lcd_clear(WHITE);
 
-    /* 设置 LED 引脚为输出模式 */
-    rt_pin_mode(PIN_LED_R, PIN_MODE_OUTPUT);
-    while (count > 0)
+    /* show RT-Thread logo */
+    lcd_show_image(0, 0, 240, 69, image_rttlogo);
+
+    /* set the background color and foreground color */
+    lcd_set_color(WHITE, BLACK);
+
+    /* show some string on lcd */
+    lcd_show_string(10, 69, 16, "Hello, RT-Thread!");
+    lcd_show_string(10, 69 + 16, 24, "RT-Thread");
+    lcd_show_string(10, 69 + 16 + 24, 32, "RT-Thread");
+
+    /* draw a line on lcd */
+    lcd_draw_line(0, 69 + 16 + 24 + 32, 240, 69 + 16 + 24 + 32);
+
+    /* draw a concentric circles */
+    lcd_draw_point(120, 194);
+    for (int i = 0; i < 46; i += 4)
     {
-        /* LED 灯亮 */
-        rt_pin_write(PIN_LED_R, PIN_LOW);
-
-        LOG_D("led on, count: %d", count);
-        rt_thread_mdelay(500);
-
-        /* LED 灯灭 */
-        rt_pin_write(PIN_LED_R, PIN_HIGH);
-        LOG_D("led off");
-        rt_thread_mdelay(500);
-        count++;
+        lcd_draw_circle(120, 194, i);
     }
-
     return 0;
 }
 

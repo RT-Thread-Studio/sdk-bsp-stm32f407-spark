@@ -17,12 +17,12 @@ KEY 在开发板中的位置如下图所示：
 ![按键位置](figures/board.png)
 ## 软件说明
 
-KEY0(LEFT) 对应的单片机引脚定义可以通过查阅头文件 `/drivers/drv_gpio.h` 获知。
+KEY0(LEFT) 对应的单片机引脚定义。
 ```c
 #define PIN_KEY0        GET_PIN(C, 0)     // PC0:  KEY0         --> KEY
 ```
 
-按键输入的源代码位于 /examples/03_basic_key/applications/main.c 中。在 main 函数中，首先为了实验效果清晰可见，板载 RGB 红色 LED 作为 KEY0(LEFT) 的状态指示灯，设置 RGB 红灯引脚的模式为输出模式，然后设置 PIN_KEY0 引脚为输入模式，最后在 while 循环中通过 rt_pin_read(PIN_KEY0) 判断 KEY0(LEFT) 的电平状态，并作 50ms 的消抖处理，如果成功判断 KEY0(LEFT) 为低电平状态（即按键按下）则打印输出 “KEY0 pressed!” 并且指示灯亮，否则指示灯熄灭。
+按键输入的源代码位于 /projects/03_basic_key/applications/main.c 中。在 main 函数中，首先为了实验效果清晰可见，板载 RGB 红色 LED 作为 KEY0(LEFT) 的状态指示灯，设置 RGB 红灯引脚的模式为输出模式，然后设置 PIN_KEY0 引脚为输入模式，最后在 while 循环中通过 rt_pin_read(PIN_KEY0) 判断 KEY0(LEFT) 的电平状态，并作 50ms 的消抖处理，如果成功判断 KEY0(LEFT) 为低电平状态（即按键按下）则打印输出 “KEY0 pressed!” 并且指示灯亮，否则指示灯熄灭。
 
 ```c
 int main(void)

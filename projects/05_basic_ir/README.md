@@ -18,7 +18,7 @@
 
 ## 软件说明
 
-红外例程的示例代码位于 /examples/05_basic_ir/applications/main.c 中，主要流程：选择 NEC 解码器，初始化 GPIO 引脚。然后在 while 循环中扫描按键、打印输出接收到的红外数据，当 KEY0 按下后将会把最近一次接收到的红外数据通过红外发射头发送出去。
+红外例程的示例代码位于 /projects/05_basic_ir/applications/main.c 中，主要流程：选择 NEC 解码器，初始化 GPIO 引脚。然后在 while 循环中扫描按键、打印输出接收到的红外数据，当 KEY0 按下后将会把最近一次接收到的红外数据通过红外发射头发送出去。
 
 ```c
 int main(void)

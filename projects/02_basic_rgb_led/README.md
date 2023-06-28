@@ -11,6 +11,7 @@
 ![RGB 电路原理图](figures/led_circuit.png)
 
 如上图所示， RGB-LED 属于共阳 LED ， 阴极分别与单片机的引脚连接，其中红色 LED 对应 PF12 号引脚，蓝色 LED 对应 PF11 号引脚。单片机对应的引脚输出低电平即可点亮对应的 LED ，输出高电平则会熄灭对应的 LED。
+> 注意：由于生产批次不同，具体LED灯的颜色可能会不一样，以实际开发板上颜色为准。
 
 RGB-LED 在开发板中的位置如下图所示：
 
@@ -25,7 +26,7 @@ RGB-LED 对应的单片机引脚定义可以通过查阅头文件 `/drivers/drv_
 #define PIN_LED_R              GET_PIN(F, 12)      // PF12 :  LED_R        --> LED
 ```
 
-RGB-LED 灯变换的源代码位于 /examples/02_basic_rgb_led/applications/main.c 中。
+RGB-LED 灯变换的源代码位于 /projects/02_basic_rgb_led/applications/main.c 中。
 
 ```c
 int main(void)

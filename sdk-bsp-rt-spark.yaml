@@ -4,7 +4,7 @@ board:
   debug_interface: SWD
   debugger: ST-LINK
   description_en: Spark-1 is an embedded RTOS development learning board designed for engineers and college students.
-  description_zh: 星火一号是一款专为工程师和高校学生设计的嵌入式 RTOS 开发学习板。
+  description_zh: 星火 1 号是一款专为工程师和高校学生设计的嵌入式 RTOS 开发学习板。
   emulator_machine: ''
   large_image: docs/images/board.jpg
   name: STM32F407-RT-SPARK
@@ -16,7 +16,7 @@ board:
   vendor: STMicroelectronics
   version: 1.0.0
 chip:
-  chip_name: STM32F407ZG
+  chip_name: STM32F407ZGTx
   clock_source: HSE
   device_vendor: STMicroelectronics
   family_name: STM32

@@ -9,7 +9,6 @@
 星火①号开发板板载的是一块 1.3 寸，分辨率为 240x240 的 LCD 显示屏，显示效果十分细腻。显示屏的驱动芯片是 ST7789 v3, 通信接口使用的是 8080 并口，通过 fsmc 模拟出驱动时序和单片机进行通讯。使用了 8 根数据线传输数据，一根地址选择线作为芯片的使能信号。
 
 ![LCD 原理图](figures/lcd.png)
-![ir_circuit](figures/ir_circuit.png)
 ![LCD 实物图](figures/board.png)
 
  ## 软件说明
@@ -19,11 +18,11 @@
 在 main 函数中，通过调用已经封装好的 LCD API 函数，首先执行的是清屏操作，将 LCD 全部刷成白色。然后设置画笔的颜色为黑色，背景色为白色。接着显示 RT-Thread 的 LOGO。最后会显示一些信息，包括 16x16 像素， 24x24 像素和 32x32 像素的三行英文字符，一条横线和一个同心圆。
 
 ```c
-static int lcd_show_all_round(void)
+int main(void)
 {
     lcd_clear(WHITE);
 
-   /* show RT-Thread logo */
+    /* show RT-Thread logo */
     lcd_show_image(0, 0, 240, 69, image_rttlogo);
 
     /* set the background color and foreground color */
@@ -31,11 +30,11 @@ static int lcd_show_all_round(void)
 
     /* show some string on lcd */
     lcd_show_string(10, 69, 16, "Hello, RT-Thread!");
-    lcd_show_string(10, 69+16, 24, "RT-Thread");
-    lcd_show_string(10, 69+16+24, 32, "RT-Thread");
+    lcd_show_string(10, 69 + 16, 24, "RT-Thread");
+    lcd_show_string(10, 69 + 16 + 24, 32, "RT-Thread");
 
     /* draw a line on lcd */
-    lcd_draw_line(0, 69+16+24+32, 240, 69+16+24+32);
+    lcd_draw_line(0, 69 + 16 + 24 + 32, 240, 69 + 16 + 24 + 32);
 
     /* draw a concentric circles */
     lcd_draw_point(120, 194);
@@ -43,7 +42,7 @@ static int lcd_show_all_round(void)
     {
         lcd_draw_circle(120, 194, i);
     }
-    return RT_EOK;
+    return 0;
 }
 ```
 ## 运行

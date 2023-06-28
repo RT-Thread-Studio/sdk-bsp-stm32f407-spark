@@ -16,7 +16,7 @@
 
 ### ICM20608 软件包
 
-该软件包位于 /examples/10_component_usb_mouse/packages/icm20608-v1.0.0 中，是 RT-Thread 针对六轴传感器 icm20608 功能使用的实现，使用这个软件包，可以让该传感器在 RT-Thread 上非常方便使用 icm20608 的基本功能，包括读取三轴加速度（3-axis accelerometer）、三轴陀螺仪（3-axis gyroscope）、零值校准等功能，如需详细了解该软件包，请参考 ICM20608 软件包中的 README。
+该软件包位于 /projects/10_component_usb_mouse/packages/icm20608-v1.0.0 中，是 RT-Thread 针对六轴传感器 icm20608 功能使用的实现，使用这个软件包，可以让该传感器在 RT-Thread 上非常方便使用 icm20608 的基本功能，包括读取三轴加速度（3-axis accelerometer）、三轴陀螺仪（3-axis gyroscope）、零值校准等功能，如需详细了解该软件包，请参考 ICM20608 软件包中的 README。
 
 ## 硬件说明
 
@@ -38,7 +38,7 @@ USB 鼠标例程位于 /projects/10_component_usb_mouse 目录下，重要文件
 | --- | --- |
 | applications | 应用 |
 | applications/main.c | app 入口 |
-| applications/joytick.c | USB 鼠标应用主要文件 |
+| applications/SD_mouse.c | USB 鼠标应用主要文件 |
 | packages | 内含简易好用的官方软件包 |
 | packages/icm20608-v1.0.0 | 六轴传感器 |
 

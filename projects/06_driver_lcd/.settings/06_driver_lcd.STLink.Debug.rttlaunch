@@ -51,7 +51,7 @@
 <stringAttribute key="org.eclipse.debug.ui.ATTR_CONSOLE_ENCODING" value="GBK"/>
 <stringAttribute key="org.rtthread.studio.debug.gdbjtag.stlink.adapterName" value="ST-LINK"/>
 <booleanAttribute key="org.rtthread.studio.debug.gdbjtag.stlink.doContinue" value="true"/>
-<stringAttribute key="org.rtthread.studio.debug.gdbjtag.stlink.gdbServerDeviceName" value="STM32F103VETx"/>
+<stringAttribute key="org.rtthread.studio.debug.gdbjtag.stlink.gdbServerDeviceName" value="STM32F407ZGTX"/>
 <stringAttribute key="org.rtthread.studio.debug.gdbjtag.stlink.gdbServerExecutable" value="${debugger_install_path}/${stlink_debugger_relative_path}/ST-LINK_gdbserver.exe"/>
 <stringAttribute key="org.rtthread.studio.debug.gdbjtag.stlink.stlinkGdbServer" value="${debugger_install_path}/${stlink_debugger_relative_path}/tools\bin\STM32_Programmer_CLI.exe"/>
 <booleanAttribute key="org.rtthread.studio.debug.gdbjtag.stlink.useRemoteTarget" value="true"/>

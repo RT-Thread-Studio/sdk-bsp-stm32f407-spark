@@ -20,8 +20,6 @@
 #define PIN_LED_B              GET_PIN(F, 11)      // PF11 :  LED_B        --> LED
 #define PIN_LED_R              GET_PIN(F, 12)      // PF12 :  LED_R        --> LED
 
-
-
 int main(void)
 {
     unsigned int count = 1;
