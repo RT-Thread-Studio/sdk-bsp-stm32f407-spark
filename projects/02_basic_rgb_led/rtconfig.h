@@ -138,9 +138,6 @@
 /* u8g2: a monochrome graphic library */
 
 
-/* PainterEngine: A cross-platform graphics application framework written in C language */
-
-
 /* tools packages */
 
 
@@ -189,7 +186,7 @@
 /* Arduino libraries */
 
 
-/* Projects */
+/* Projects and Demos */
 
 
 /* Sensors */
@@ -219,8 +216,6 @@
 
 
 /* Uncategorized */
-
-/* Privated Packages of RealThread */
 
 #define SOC_FAMILY_STM32
 #define SOC_SERIES_STM32F4
