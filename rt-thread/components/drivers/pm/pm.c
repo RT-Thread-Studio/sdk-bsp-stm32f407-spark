@@ -358,7 +358,8 @@ RT_WEAK rt_uint8_t pm_get_sleep_threshold_mode(rt_uint8_t cur_mode, rt_tick_t ti
  * This function changes the power sleep mode base on the result of selection
  */
 static void _pm_change_sleep_mode(struct rt_pm *pm)
-{
+{    
+
     rt_tick_t timeout_tick, delta_tick;
     rt_base_t level;
     uint8_t sleep_mode = PM_SLEEP_MODE_DEEP;
@@ -367,7 +368,6 @@ static void _pm_change_sleep_mode(struct rt_pm *pm)
 
     /* judge sleep mode from module request */
     pm->sleep_mode = _pm_select_sleep_mode(pm);
-
     /* module busy request check */
     if (_pm_device_check_idle() == RT_FALSE)
     {

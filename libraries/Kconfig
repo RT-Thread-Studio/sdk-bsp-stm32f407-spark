@@ -15,7 +15,7 @@ config SOC_STM32F407ZG
     select RT_USING_USER_MAIN
     default y
 
-config BOARD_STM32F407_ATK_EXPLORER
+config BOARD_STM32F407_SPARK
     bool
     default y
 
@@ -84,14 +84,12 @@ menu "Onboard Peripheral Drivers"
         select BSP_USING_PWM3
         select BSP_USING_PWM3_CH2
         if BSP_USING_ONBOARD_LED_MATRIX
-        	config BSP_USING_LED_MATRIX_RS485_DEMO
-        		bool "use led matrix rs485 example"
-        		default n
-        		select BSP_USING_RS485
+            config BSP_USING_LED_MATRIX_RS485_DEMO
+                bool "use led matrix rs485 example"
+                default n
+                select BSP_USING_RS485
         endif
-        		
 
-        
     config BSP_USING_LVGL
         bool "Enable LVGL for LCD"
         select BSP_USING_ONBOARD_LCD
@@ -108,14 +106,6 @@ menu "Onboard Peripheral Drivers"
         bool "Enable SPI FLASH (W25Q64 spi2)"
         select BSP_USING_SPI
         select BSP_USING_SPI2
-        select RT_USING_SFUD
-        select RT_SFUD_USING_SFDP
-        default n
-
-    config BSP_USING_SOFT_SPI_FLASH
-        bool "Enable soft SPI FLASH (W25Q128 sspi2)"
-        select BSP_USING_SOFT_SPI
-        select BSP_USING_SOFT_SPI2
         select RT_USING_SFUD
         select RT_SFUD_USING_SFDP
         default n
@@ -160,7 +150,7 @@ menu "Onboard Peripheral Drivers"
 					default y
 			endif
         endif
-      
+
     config BSP_USING_FAL
 		bool "Enable FAL (enable on-chip flash and spi2 flash)"
 		select BSP_USING_SPI_FLASH
@@ -177,17 +167,82 @@ menu "Onboard Peripheral Drivers"
 			
 		
 	config BSP_USING_EASYFLASH
-    	bool "Enable easy flash base on FAL"
+        bool "Enable Easy Flash base on FAL"
         select BSP_USING_FAL
         select PKG_USING_EASYFLASH
         default n
         
-    menuconfig BSP_USING_RW007_WLAN
-        bool "Enable rw007 wlan base on spi2"
+    config BSP_USING_RW007_WLAN
+        bool "Enable Rw007 Wlan Base on SPI2"
         default n
         select PKG_USING_RW007
         select BSP_USING_SPI
         select BSP_USING_SPI2
+    
+    config BSP_USING_AHT21
+        bool "Enable AHT21(i2c3)" 
+        select BSP_USING_I2C
+        select BSP_USING_I2C3
+        select PKG_USING_SENSORS_DRIVERS
+        select PKG_USING_AHT10
+        default n
+
+    config BSP_USING_AP3216C
+        bool "Enable AP3216C(i2c2)"
+        select BSP_USING_I2C
+        select BSP_USING_I2C2
+        select PKG_USING_SENSORS_DRIVERS
+        select PKG_USING_AP3216C
+        default n
+
+    config BSP_USING_ICM20608
+        bool "Enable ICM20608(i2c2)"
+        select BSP_USING_I2C
+        select BSP_USING_I2C2
+        select PKG_USING_SENSORS_DRIVERS
+        select PKG_USING_ICM20608
+        default n
+
+    config BSP_USING_USB_MOUSE
+        bool "Enable Usb Mouse(usb hid device)"
+        select BSP_USING_USBD
+        select RT_USB_DEVICE_HID
+        select RT_USB_DEVICE_HID_MOUSE
+        select BSP_USING_ICM20608
+
+    config BSP_USING_EASYFLASH
+        bool "Enable Easy Flash base on FAL"
+        select BSP_USING_FAL
+        select PKG_USING_EASYFLASH
+        default n
+
+    menuconfig BSP_USING_CAN
+        bool "Enable On Board CAN"
+        select RT_USING_CAN
+        default n
+        if BSP_USING_CAN
+            config BSP_USING_CAN1
+            bool "Enable On Board CAN1"
+            default n
+        endif
+
+    menuconfig BSP_USING_AUDIO
+        bool "Enable Audio Device"
+        select RT_USING_AUDIO
+        select BSP_USING_I2C
+        select BSP_USING_I2C2
+        default n
+
+        if BSP_USING_AUDIO
+            config BSP_USING_AUDIO_PLAY
+            bool "Enable Audio Play"
+            default y
+
+            config BSP_USING_AUDIO_RECORD
+            bool "Enable Audio Record"
+            default n
+        endif   
+
         
 endmenu
 
@@ -304,6 +359,23 @@ menu "On-chip Peripheral Drivers"
             config BSP_USING_TIM14
                 bool "Enable TIM14"
                 default n
+        endif
+
+    menuconfig BSP_USING_ONCHIP_RTC
+        bool "Enable RTC"
+        select RT_USING_RTC
+        default n
+        if BSP_USING_ONCHIP_RTC
+            choice
+                prompt "Select clock source"
+                default BSP_RTC_USING_LSE
+
+                config BSP_RTC_USING_LSE
+                    bool "RTC USING LSE"
+
+                config BSP_RTC_USING_LSI
+                    bool "RTC USING LSI"
+            endchoice
         endif
 
     menuconfig BSP_USING_PWM
@@ -436,57 +508,68 @@ menu "On-chip Peripheral Drivers"
                 default n
         endif
 
-    menuconfig BSP_USING_I2C1
-        bool "Enable I2C1 BUS (software simulation)"
+    menuconfig BSP_USING_I2C
+        bool "Enable I2C"
         default n
-        select RT_USING_I2C
-        select RT_USING_I2C_BITOPS
-        select RT_USING_PIN
-        if BSP_USING_I2C1
-            config BSP_I2C1_SCL_PIN
-                int "i2c1 scl pin number"
-                range 0 143
-                default 24
-            config BSP_I2C1_SDA_PIN
-                int "I2C1 sda pin number"
-                range 0 143
-                default 25
+        if BSP_USING_I2C
+            menuconfig BSP_USING_I2C1
+                bool "Enable I2C1 BUS (software simulation)"
+                default n
+                select RT_USING_I2C
+                select RT_USING_I2C_BITOPS
+                select RT_USING_PIN
+                if BSP_USING_I2C1
+                    config BSP_I2C1_SCL_PIN
+                        int "i2c1 scl pin number"
+                        range 0 143
+                        default 24
+                    config BSP_I2C1_SDA_PIN
+                        int "I2C1 sda pin number"
+                        range 0 143
+                        default 25
+                endif
+
+            menuconfig BSP_USING_I2C2
+                bool "Enable I2C2 BUS for AP3216C/ICM20608/ES8388/ Onboard(software simulation)"
+                default n
+                select RT_USING_I2C
+                select RT_USING_I2C_BITOPS
+                select RT_USING_PIN
+                if BSP_USING_I2C2
+                    config BSP_I2C2_SCL_PIN
+                        int "i2c2 scl pin number, PF1"
+                        range 0 143
+                        default 81
+                    config BSP_I2C2_SDA_PIN
+                        int "I2C2 sda pin number, PF0"
+                        range 0 143
+                        default 80
+                endif
+        
+            menuconfig BSP_USING_I2C3
+                bool "Enable I2C3 BUS for AHT21 Onboard(software simulation)"
+                default n
+                select RT_USING_I2C
+                select RT_USING_I2C_BITOPS
+                select RT_USING_PIN
+                if BSP_USING_I2C3
+                    config BSP_I2C3_SCL_PIN
+                        int "i2c3 scl pin number, PE0"
+                        range 0 143
+                        default 64
+                    config BSP_I2C3_SDA_PIN
+                        int "I2C3 sda pin number, PE1"
+                        range 0 143
+                        default 65
+                endif
         endif
 
-    menuconfig BSP_USING_I2C2
-        bool "Enable LCD Touch BUS (software simulation)"
+    config BSP_USING_ONBOARD_PM
+        bool "Enable Power Management"
+        select RT_USING_PM
+        select RT_USING_HOOK
         default n
-        select RT_USING_I2C
-        select RT_USING_I2C_BITOPS
-        select RT_USING_PIN
-        if BSP_USING_I2C2
-            config BSP_I2C2_SCL_PIN
-                int "i2c2 scl pin number, PB0"
-                range 0 143
-                default 16
-            config BSP_I2C2_SDA_PIN
-                int "I2C2 sda pin number, PF11"
-                range 0 143
-                default 91
-        endif
-    
-    menuconfig BSP_USING_I2C3
-        bool "Enable I2C3 BUS (software simulation)"
-        default n
-        select RT_USING_I2C
-        select RT_USING_I2C_BITOPS
-        select RT_USING_PIN
-        if BSP_USING_I2C3
-            config BSP_I2C3_SCL_PIN
-                int "i2c3 scl pin number, PE0"
-                range 0 143
-                default 64
-            config BSP_I2C3_SDA_PIN
-                int "I2C3 sda pin number, PE1"
-                range 0 143
-                default 65
-        endif
-
+        
     menuconfig BSP_USING_DAC
         bool "Enable DAC"
         default n

@@ -40,15 +40,24 @@ if GetDepend(['BSP_USING_ONBOARD_LED_MATRIX']):
 	src += Glob('led_matrix/drv_matrix_led.c')
 	path += [cwd + '/led_matrix']
 
-
 if GetDepend(['BSP_USING_EASYFLASH']):
     src += Glob('ef_fal_port.c')
 
 if GetDepend(['BSP_USING_ENC28j60']):
     src += Glob('drv_enc28j60.c')
 
+if GetDepend(['BSP_USING_ONBOARD_PM']):
+	src += Glob('pm/drv_pm.c')
+	src += Glob('pm/drv_wakeup.c')
+	path += [cwd + '/pm']
 
+if GetDepend(['BSP_USING_AUDIO']):
+    src += Glob('audio/drv_es8388.c')
+    src += Glob('audio/drv_sound.c')
+    path += [cwd + '/audio']
 
+if GetDepend(['BSP_USING_AUDIO_RECORD']):
+    src += Glob('audio/drv_mic.c')
 
 CPPDEFINES = ['STM32F407xx']
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)

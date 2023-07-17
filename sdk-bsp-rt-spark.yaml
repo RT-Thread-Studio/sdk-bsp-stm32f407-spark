@@ -16,7 +16,7 @@ board:
   vendor: STMicroelectronics
   version: 1.0.0
 chip:
-  chip_name: STM32F407ZGTx
+  chip_name: STM32F407ZG
   clock_source: HSE
   device_vendor: STMicroelectronics
   family_name: STM32
@@ -29,8 +29,8 @@ chip:
   uart_name: UART1
 docs:
 - category: other
-  file: docs/SCH_Spark-1_V1_0.pdf
-  title: SCH_Spark-1_V1_0
+  file: docs/SCH_LearnBoard_IoT_V0_0.pdf
+  title: SCH_LearnBoard_IoT_V0_0
 features:
 - 'On-chip Flash:1024KB'
 - 'SRAM:196KB (including 64KB CCM)'
@@ -55,10 +55,10 @@ features_zh:
 - '更多...'
 pkg_type: Board_Support_Packages
 pkg_vendor: rtt
-pkg_version: 0.1.0
+pkg_version: 0.2.0
 template_projects:
 - builtin_files:
-  - source_path_offset: projects/01_basic_led_blink
+  - source_path_offset: projects/02_basic_led_blink
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -87,11 +87,11 @@ template_projects:
   project_name: rt-spark
   project_type: rt-thread|@full|@4.1.1
 example_projects:
-- project_name: 01_basic_led_blink
+- project_name: 02_basic_led_blink
   project_description: LED 闪烁示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/01_basic_led_blink
+  - source_path_offset: projects/02_basic_led_blink
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -145,11 +145,11 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 03_basic_key
+- project_name: 02_basic_key
   project_description: 按键示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/03_basic_key
+  - source_path_offset: projects/02_basic_key
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -174,11 +174,11 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 04_basic_beep_led
+- project_name: 02_basic_irq_beep
   project_description: 蜂鸣器示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/04_basic_beep_led
+  - source_path_offset: projects/02_basic_irq_beep
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -203,11 +203,11 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 05_basic_ir
+- project_name: 02_basic_ir
   project_description: 红外遥控示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/05_basic_ir
+  - source_path_offset: projects/02_basic_ir
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -232,11 +232,40 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 06_driver_lcd
+- project_name: 02_basic_rtc
+  project_description: RTC 和 RTC 闹钟的使用例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/02_basic_rtc
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 03_driver_lcd
   project_description: LCD 示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/06_driver_lcd
+  - source_path_offset: projects/03_driver_lcd
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -261,11 +290,11 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 07_driver_temp_humi
+- project_name: 03_driver_temp_humi
   project_description: 温湿度传感器示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/07_driver_temp_humi
+  - source_path_offset: projects/03_driver_temp_humi
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -290,11 +319,11 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 08_driver_als_ps
+- project_name: 03_driver_als_ps
   project_description: 接近与光强传感器示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/08_driver_als_ps
+  - source_path_offset: projects/03_driver_als_ps
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -319,11 +348,11 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 09_driver_axis
+- project_name: 03_driver_axis
   project_description: 六轴传感器示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/09_driver_axis
+  - source_path_offset: projects/03_driver_axis
     target_path_offset: ''
     files_and_folders:
     - "*"
@@ -348,11 +377,591 @@ example_projects:
     package_version: 4.1.1
     source_path_offset: ''
     target_path_offset: rt-thread
-- project_name: 10_component_usb_mouse
+- project_name: 03_driver_can
+  project_description: CAN 通信例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/03_driver_can
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 03_driver_led_matrix
+  project_description: LED MATRIX 闪烁例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/03_driver_led_matrix
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 04_component_usb_mouse
   project_description: USB 鼠标示例
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
-  - source_path_offset: projects/10_component_usb_mouse
+  - source_path_offset: projects/04_component_usb_mouse
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 04_component_fs_tf_card
+  project_description: TF 卡示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/04_component_fs_tf_card
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 04_component_pm
+  project_description: 电源管理示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/04_component_pm
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 04_component_fal
+  project_description: FAL 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/04_component_fal
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 04_component_kv
+  project_description: KV 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/04_component_kv
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 04_component_fs_flash
+  project_description: DFS 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/04_component_fs_flash
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_wifi_manager
+  project_description: WIFI 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_wifi_manager
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_mqtt
+  project_description: MQTT 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_mqtt
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_http_client
+  project_description: HTTP Client 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_http_client
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_mbedtls
+  project_description: mbedtls 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_mbedtls
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_ota_ymodem
+  project_description: OTA ymodem 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_ota_ymodem
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_ota_http
+  project_description: OTA http 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_ota_http
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_netutils
+  project_description: 网络小工具示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_netutils
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_cloud_onenet
+  project_description: onenet 云示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_cloud_onenet
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_cloud_ali_iotkit
+  project_description: 阿里云示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_cloud_ali_iotkit
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 05_iot_web_server
+  project_description: Web Server 示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/05_iot_web_server
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 06_demo_lvgl
+  project_description: LVGL 例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/06_demo_lvgl
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 06_demo_micropython
+  project_description: MicroPython 例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/06_demo_micropython
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 06_demo_rs485_led_matrix
+  project_description: 板载 LED matrix 和 RS485 驱动例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/06_demo_rs485_led_matrix
     target_path_offset: ''
     files_and_folders:
     - "*"
