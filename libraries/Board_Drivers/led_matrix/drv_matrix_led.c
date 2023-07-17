@@ -44,10 +44,10 @@ const uint8_t tile[] = {3, 7};
 // 常见颜色定义
 
 const RGBColor_TypeDef DARK = {0, 0, 0};
-const RGBColor_TypeDef GREEN = {255/5, 0, 0};
-const RGBColor_TypeDef RED = {0, 255/5, 0};
-const RGBColor_TypeDef BLUE = {0, 0, 255/5};
-const RGBColor_TypeDef WHITE = {255/5, 255/5, 255/5};
+const RGBColor_TypeDef GREEN = {255, 0, 0};
+const RGBColor_TypeDef RED = {0, 255, 0};
+const RGBColor_TypeDef BLUE = {0, 0, 255};
+const RGBColor_TypeDef WHITE = {255, 255, 255};
 
 // 灯颜色缓存
 RGBColor_TypeDef RGB_Data[LED_NUM] = {0};

@@ -80,10 +80,12 @@ void HAL_IncTick(void)
 
 void HAL_SuspendTick(void)
 {
+    HAL_NVIC_DisableIRQ(SysTick_IRQn);
 }
 
 void HAL_ResumeTick(void)
 {
+    HAL_NVIC_EnableIRQ(SysTick_IRQn);
 }
 
 void HAL_Delay(__IO uint32_t Delay)

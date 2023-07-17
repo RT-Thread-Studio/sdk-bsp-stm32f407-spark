@@ -11,12 +11,16 @@
 ![RGB 电路原理图](figures/led_circuit.png)
 
 如上图所示， RGB-LED 属于共阳 LED ， 阴极分别与单片机的引脚连接，其中红色 LED 对应 PF12 号引脚，蓝色 LED 对应 PF11 号引脚。单片机对应的引脚输出低电平即可点亮对应的 LED ，输出高电平则会熄灭对应的 LED。
+
 > 注意：由于生产批次不同，具体LED灯的颜色可能会不一样，以实际开发板上颜色为准。
 
 RGB-LED 在开发板中的位置如下图所示：
 
 ![RGB LED 位置](figures/blue_led_light.jpg)
+
 ## 软件说明
+
+本例程的源码位于 `/projects/02_basic_rgb_led`。
 
 RGB-LED 对应的单片机引脚定义可以通过查阅头文件 `/drivers/drv_gpio.h` 获知。
 
@@ -67,9 +71,10 @@ int main(void)
 ```
 
 ## 运行
+
 ### 编译 & 下载
 
-- RT-Thread Studio：通过RT-Thread Studio导入工程，执行编译。
+- RT-Thread Studio：在 RT-Thread Studio 的包管理器中下载 `STM32F407-RT-SPARK` 资源包，然后创建新工程，执行编译。
 - MDK：首先双击 mklinks.bat，生成 rt-thread 与 libraries 文件夹链接；再使用 Env 生成 MDK5 工程；最后双击 project.uvprojx 打开 MDK5 工程，执行编译。
 
 编译完成后，将开发板的 ST-Link USB 口与 PC 机连接，然后将固件下载至开发板。
@@ -78,9 +83,9 @@ int main(void)
 
 按下复位按键重启开发板，观察开发板上 RBG-LED 的实际效果。正常运行后， RGB 会周期性变化，如下图所示：
 
-![红色灯运行](figures/red_led_light.jpg)
+![红色（或其他颜色）灯运行](figures/red_led_light.jpg)
 
-![蓝色灯运行](figures/blue_led_light.jpg)
+![蓝色（或其他颜色）灯运行](figures/blue_led_light.jpg)
 
 此时也可以在 PC 端使用终端工具打开开发板的 ST-Link 提供的虚拟串口，设置 115200 8 1 N 。开发板的运行日志信息即可实时输出出来。
 
