@@ -70,4 +70,4 @@ int main(void)
 
 ## 引用参考
 
-- 设备与驱动：[SPI 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/spi/spi)
+暂无。
