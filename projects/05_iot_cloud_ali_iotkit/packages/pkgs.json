@@ -1,0 +1,17 @@
+[
+ {
+  "path": "/packages/iot/WiFi/rw007", 
+  "ver": "v2.0.1", 
+  "name": "RW007"
+ }, 
+ {
+  "path": "/packages/iot/iot_cloud/ali-iotkit", 
+  "ver": "v3.0.1", 
+  "name": "ALI_IOTKIT"
+ }, 
+ {
+  "path": "/packages/language/JSON/cJSON", 
+  "ver": "v1.7.15", 
+  "name": "CJSON"
+ }
+]

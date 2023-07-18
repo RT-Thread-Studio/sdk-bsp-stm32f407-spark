@@ -1,0 +1,22 @@
+[
+ {
+  "path": "/packages/iot/WiFi/rw007", 
+  "ver": "v2.0.1", 
+  "name": "RW007"
+ }, 
+ {
+  "path": "/packages/iot/netutils", 
+  "ver": "v1.3.3", 
+  "name": "NETUTILS"
+ }, 
+ {
+  "path": "/packages/iot/ota_downloader", 
+  "ver": "v1.0.0", 
+  "name": "OTA_DOWNLOADER"
+ }, 
+ {
+  "path": "/packages/misc/optparse", 
+  "ver": "v1.0.0", 
+  "name": "OPTPARSE"
+ }
+]
