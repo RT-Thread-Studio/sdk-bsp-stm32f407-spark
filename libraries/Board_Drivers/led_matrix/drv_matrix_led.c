@@ -33,12 +33,12 @@ TIM_HandleTypeDef htim3;
 DMA_HandleTypeDef hdma_tim3_ch2;
 
 ALIGN(4)
-uint8_t led_buffer[(LED_NUM + 1) * 24 * 2];
+uint8_t led_buffer[LED_NUM * 24 * 2];
 
 extern void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
-// 模拟bit码: 3为逻辑0, 7为逻辑1
-const uint8_t tile[] = {3, 7};
+// 模拟bit码: 2为逻辑0, 7为逻辑1
+const uint8_t tile[] = {2, 7};
 
 
 // 常见颜色定义
@@ -48,10 +48,15 @@ const RGBColor_TypeDef GREEN = {255, 0, 0};
 const RGBColor_TypeDef RED = {0, 255, 0};
 const RGBColor_TypeDef BLUE = {0, 0, 255};
 const RGBColor_TypeDef WHITE = {255, 255, 255};
+const RGBColor_TypeDef LT_RED = {0, 32, 0};
+const RGBColor_TypeDef LT_GREEN = {32, 0, 0};
+const RGBColor_TypeDef LT_BLUE = {0, 0, 32};
+const RGBColor_TypeDef LT_WHITE = {16, 16, 16};
 
 // 灯颜色缓存
 RGBColor_TypeDef RGB_Data[LED_NUM] = {0};
 
+void led_matrix_rst();
 /**
  * @brief This function handles DMA2 stream3 global interrupt.
  */
@@ -64,7 +69,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
     {
-        rt_kprintf("pulse finished\n");
+        __HAL_TIM_SetCompare(htim, TIM_CHANNEL_2,0); //占空比清0
     }
 }
 /**
@@ -81,9 +86,9 @@ static int matrix_init(void)
     __HAL_RCC_TIM3_CLK_ENABLE();
 
     htim3.Instance = TIM3;
-    htim3.Init.Prescaler = 11-1;
+    htim3.Init.Prescaler = 10-1;
     htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim3.Init.Period = 10-1;    // 760kHz
+    htim3.Init.Period = 10-1;    // 840kHz
     htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim3.Init.RepetitionCounter = 0;
     htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -134,7 +139,7 @@ static int matrix_init(void)
 
     rt_pin_mode(LED_MATRIX_EN_PIN, PIN_MODE_OUTPUT);
     rt_pin_write(LED_MATRIX_EN_PIN, PIN_LOW);
-
+    led_matrix_rst();
     return RT_EOK;
 
 }
@@ -191,9 +196,6 @@ void RGB_Reflash(void)
             dat_b >>=1;
         }
     }
-    led_buffer[sizeof(led_buffer)-2] = 0;
-    led_buffer[sizeof(led_buffer)-1] = 0;
-    rt_memset(led_buffer + (LED_NUM * 24 * 2), 0x00, 48);
     TIM_Send_WS2812(led_buffer, sizeof(led_buffer) / 2);
 
 }
@@ -204,12 +206,41 @@ void led_matrix_rst()
         led_buffer[ (i<<1) ] = 3;
         led_buffer[ (i<<1) + 1] = 0;
     }
-    rt_memset(led_buffer + (LED_NUM * 24 *2), 0x00, 48);
     TIM_Send_WS2812(led_buffer, sizeof(led_buffer) / 2 );
 }
 
 MSH_CMD_EXPORT(led_matrix_rst, Test led matrix on board)
 
+void led_matrix_fill(RGBColor_TypeDef Color)
+{
+    rt_memset(RGB_Data, 0x00, sizeof(RGB_Data));
+    for (uint8_t i = 0; i < LED_NUM; i++)
+    {
+        Set_LEDColor(i, Color);
+    }
+    RGB_Reflash();
+}
+
+void led_matrix_fill_test(uint8_t index)
+{
+    switch (index)
+    {
+    case 0:
+        led_matrix_fill(LT_RED);
+        break;
+    case 1:
+        led_matrix_fill(LT_GREEN);
+        break;
+    case 2:
+        led_matrix_fill(LT_BLUE);
+        break;
+    case 3:
+        led_matrix_fill(LT_WHITE);
+        break;
+    default:
+        break;
+    }
+}
 
 void led_matrix_test1()
 {
@@ -255,15 +286,18 @@ MSH_CMD_EXPORT(led_matrix_test2, Test led matrix on board)
 
 void led_matrix_test3()
 {
-    rt_memset(RGB_Data, 0x00, sizeof(RGB_Data));
-    for (uint8_t i = 0; i < 20; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
-        Set_LEDColor(i*3, RED);
-        Set_LEDColor(i*3+1, GREEN);
-        Set_LEDColor(i*3+2, BLUE);
+        led_matrix_fill_test(i);
+        rt_thread_mdelay(1000);
     }
-
-    RGB_Reflash();
+    led_matrix_rst();
 }
 
 MSH_CMD_EXPORT(led_matrix_test3, Test led matrix on board)
+
+void led_matrix_show_color(uint8_t r, uint8_t g, uint8_t b)
+{
+    RGBColor_TypeDef color = {g,r,b};
+    led_matrix_fill(color);
+}
