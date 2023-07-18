@@ -1,0 +1,12 @@
+[
+ {
+  "path": "/packages/iot/WiFi/rw007", 
+  "ver": "v2.0.1", 
+  "name": "RW007"
+ }, 
+ {
+  "path": "/packages/language/micropython", 
+  "ver": "v1.13.0", 
+  "name": "MICROPYTHON"
+ }
+]

@@ -1,0 +1,12 @@
+[
+ {
+  "path": "/packages/iot/webclient", 
+  "ver": "v2.2.0", 
+  "name": "WEBCLIENT"
+ }, 
+ {
+  "path": "/packages/iot/WiFi/rw007", 
+  "ver": "v2.0.1", 
+  "name": "RW007"
+ }
+]

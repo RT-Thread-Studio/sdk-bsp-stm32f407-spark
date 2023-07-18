@@ -1,0 +1,22 @@
+[
+ {
+  "path": "/packages/iot/pahomqtt", 
+  "ver": "v1.2.0", 
+  "name": "PAHOMQTT"
+ }, 
+ {
+  "path": "/packages/iot/WiFi/rw007", 
+  "ver": "v2.0.1", 
+  "name": "RW007"
+ }, 
+ {
+  "path": "/packages/iot/iot_cloud/onenet", 
+  "ver": "v1.0.0", 
+  "name": "ONENET"
+ }, 
+ {
+  "path": "/packages/language/JSON/cJSON", 
+  "ver": "v1.7.15", 
+  "name": "CJSON"
+ }
+]
