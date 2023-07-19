@@ -16,7 +16,7 @@ board:
   vendor: STMicroelectronics
   version: 1.0.0
 chip:
-  chip_name: STM32F407ZG
+  chip_name: STM32F407ZGTx
   clock_source: HSE
   device_vendor: STMicroelectronics
   family_name: STM32
@@ -29,8 +29,8 @@ chip:
   uart_name: UART1
 docs:
 - category: other
-  file: docs/SCH_LearnBoard_IoT_V0_0.pdf
-  title: SCH_LearnBoard_IoT_V0_0
+  file: docs/SCH_Spark-1_V1_0.pdf
+  title: SCH_Spark-1_V1_0
 features:
 - 'On-chip Flash:1024KB'
 - 'SRAM:196KB (including 64KB CCM)'
