@@ -1,0 +1,23 @@
+from building import *
+import os
+import rtconfig
+
+cwd = GetCurrentDir()
+src = Glob('src/*.c')
+src += Glob('src/nes_mapper/*.c')
+src += Glob('port/*.c')
+CPPPATH = [cwd]
+CPPPATH += [cwd + '/inc']
+CPPPATH += [cwd + '/port']
+
+LOCAL_CFLAGS = ''
+if rtconfig.PLATFORM in ['armcc']:
+    LOCAL_CFLAGS += ' --gnu'
+group = DefineGroup('nes', src, depend = [''], CPPPATH = CPPPATH, LOCAL_CFLAGS = LOCAL_CFLAGS)
+
+list = os.listdir(cwd)
+for item in list:
+    if os.path.isfile(os.path.join(cwd, item, 'SConscript')):
+        group = group + SConscript(os.path.join(item, 'SConscript'))
+
+Return('group')

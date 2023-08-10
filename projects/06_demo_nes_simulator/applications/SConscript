@@ -1,0 +1,20 @@
+from building import *
+import os
+import rtconfig
+
+cwd     = GetCurrentDir()
+src = Glob('*.c')
+CPPPATH = [cwd]
+
+LOCAL_CFLAGS = ''
+if rtconfig.PLATFORM in ['armcc']:
+    LOCAL_CFLAGS += ' --gnu'
+
+group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH, LOCAL_CFLAGS = LOCAL_CFLAGS)
+
+list = os.listdir(cwd)
+for item in list:
+    if os.path.isfile(os.path.join(cwd, item, 'SConscript')):
+        group = group + SConscript(os.path.join(item, 'SConscript'))
+
+Return('group')

@@ -29,8 +29,8 @@ chip:
   uart_name: UART1
 docs:
 - category: other
-  file: docs/SCH_Spark-1_V1_0.pdf
-  title: SCH_Spark-1_V1_0
+  file: docs/星火1号开发板原理图_V1_0.pdf
+  title: 星火1号开发板原理图
 features:
 - 'On-chip Flash:1024KB'
 - 'SRAM:196KB (including 64KB CCM)'
@@ -55,7 +55,7 @@ features_zh:
 - '更多...'
 pkg_type: Board_Support_Packages
 pkg_vendor: rtt
-pkg_version: 0.2.0
+pkg_version: 1.0.0
 template_projects:
 - builtin_files:
   - source_path_offset: projects/02_basic_led_blink
@@ -87,6 +87,35 @@ template_projects:
   project_name: rt-spark
   project_type: rt-thread|@full|@4.1.1
 example_projects:
+- project_name: 01_kernel
+  project_description: 内核学习示例
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/01_kernel
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
 - project_name: 02_basic_led_blink
   project_description: LED 闪烁示例
   project_type: rt-thread|@full|@4.1.1
@@ -962,6 +991,64 @@ example_projects:
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
   - source_path_offset: projects/06_demo_rs485_led_matrix
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 06_demo_factory
+  project_description: 出厂综合 Demo
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/06_demo_factory
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 06_demo_nes_simulator
+  project_description: nes 游戏模拟器例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/06_demo_nes_simulator
     target_path_offset: ''
     files_and_folders:
     - "*"
