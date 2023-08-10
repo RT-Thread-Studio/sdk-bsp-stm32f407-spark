@@ -1,1 +1,0 @@
-<% response.write "hello asp !" %>

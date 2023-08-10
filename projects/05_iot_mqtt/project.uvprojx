@@ -13,8 +13,8 @@
         <TargetCommonOption>
           <Device>STM32F407ZGTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F4xx_DFP.2.14.0</PackID>
+          <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) IROM(0x08000000,0x100000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec />
           <StartupFile />
@@ -181,6 +181,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -347,7 +349,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <uClangAs>0</uClangAs>
+            <ClangAsOpt>4</ClangAsOpt>
             <VariousControls>
               <MiscControls />
               <Define />
@@ -1508,16 +1510,16 @@
           <GroupName>paho-mqtt</GroupName>
           <Files>
             <File>
-              <FileName>MQTTUnsubscribeServer.c</FileName>
+              <FileName>MQTTDeserializePublish.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTUnsubscribeServer.c</FilePath>
+              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTDeserializePublish.c</FilePath>
             </File>
           </Files>
           <Files>
             <File>
-              <FileName>MQTTUnsubscribeClient.c</FileName>
+              <FileName>MQTTUnsubscribeServer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTUnsubscribeClient.c</FilePath>
+              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTUnsubscribeServer.c</FilePath>
             </File>
           </Files>
           <Files>
@@ -1529,23 +1531,9 @@
           </Files>
           <Files>
             <File>
-              <FileName>paho_mqtt_pipe.c</FileName>
+              <FileName>MQTTUnsubscribeClient.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\pahomqtt-v1.2.0\MQTTClient-RT\paho_mqtt_pipe.c</FilePath>
-            </File>
-          </Files>
-          <Files>
-            <File>
-              <FileName>MQTTConnectServer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTConnectServer.c</FilePath>
-            </File>
-          </Files>
-          <Files>
-            <File>
-              <FileName>MQTTSubscribeServer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTSubscribeServer.c</FilePath>
+              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTUnsubscribeClient.c</FilePath>
             </File>
           </Files>
           <Files>
@@ -1557,16 +1545,16 @@
           </Files>
           <Files>
             <File>
-              <FileName>MQTTSubscribeClient.c</FileName>
+              <FileName>paho_mqtt_pipe.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTSubscribeClient.c</FilePath>
+              <FilePath>packages\pahomqtt-v1.2.0\MQTTClient-RT\paho_mqtt_pipe.c</FilePath>
             </File>
           </Files>
           <Files>
             <File>
-              <FileName>MQTTDeserializePublish.c</FileName>
+              <FileName>MQTTSubscribeServer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTDeserializePublish.c</FilePath>
+              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTSubscribeServer.c</FilePath>
             </File>
           </Files>
           <Files>
@@ -1574,6 +1562,20 @@
               <FileName>MQTTFormat.c</FileName>
               <FileType>1</FileType>
               <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTFormat.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>MQTTSubscribeClient.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTSubscribeClient.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>MQTTConnectServer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\pahomqtt-v1.2.0\MQTTPacket\src\MQTTConnectServer.c</FilePath>
             </File>
           </Files>
           <Files>
@@ -1678,4 +1680,18 @@
     <components />
     <files />
   </RTE>
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>&lt;Project Info&gt;</LayName>
+        <LayDesc />
+        <LayUrl />
+        <LayKeys />
+        <LayCat />
+        <LayLic />
+        <LayTarg>0</LayTarg>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 </Project>

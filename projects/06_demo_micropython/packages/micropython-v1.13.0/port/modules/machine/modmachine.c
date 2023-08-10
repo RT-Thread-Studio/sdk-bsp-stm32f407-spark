@@ -60,13 +60,13 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
         mp_printf(&mp_plat_print, "---------------------------------------------\n");
 
 #ifdef RT_USING_FINSH
-        extern void free(void);
+        extern void cmd_free(void);
         extern void list_memheap(void);
 
 #ifdef RT_USING_MEMHEAP_AS_HEAP
         list_memheap();
 #else
-        free();
+        cmd_free();
 #endif
 
         list_thread();

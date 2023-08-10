@@ -31,6 +31,7 @@
 #ifdef RT_USING_DFS
 #include <unistd.h>
 #include <fcntl.h>
+#include <dfs.h>
 #endif
 #include <py/compile.h>
 #include <py/runtime.h>

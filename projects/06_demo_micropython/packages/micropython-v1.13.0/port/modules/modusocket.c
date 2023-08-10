@@ -37,6 +37,8 @@
 #include <sys/time.h>
 #include <sys/select.h>
 
+#include <errno.h>
+
 #include "py/objtuple.h"
 #include "py/objlist.h"
 #include "py/runtime.h"

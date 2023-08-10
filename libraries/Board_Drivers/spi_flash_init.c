@@ -15,7 +15,7 @@
 
 #if defined(BSP_USING_SPI_FLASH)
 
-static int rt_hw_spi_flash_init(void)
+int rt_hw_spi_flash_init(void)
 {
     __HAL_RCC_GPIOB_CLK_ENABLE();
     rt_hw_spi_device_attach("spi2", "spi20", GPIOB, GPIO_PIN_12);

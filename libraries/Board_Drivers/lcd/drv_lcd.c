@@ -11,15 +11,18 @@
  * 2023-05-17     yuanjie      parallel driver improved
  */
 
-#include <rtdevice.h>
 #include <board.h>
-#include "string.h"
 #include "drv_lcd.h"
 #include "drv_lcd_font.h"
+#include "string.h"
 
 #define DRV_DEBUG
 #define LOG_TAG "drv.lcd"
 #include <drv_log.h>
+
+#ifdef BSP_USING_ONBOARD_LCD_TEAREFFECT
+    #define LCD_TE_PIN  GET_PIN(D, 6)
+#endif /* BSP_USING_ONBOARD_LCD_TEAREFFECT */
 
 _lcd_dev lcddev;
 rt_uint16_t BACK_COLOR = WHITE, FORE_COLOR = BLACK;
@@ -29,13 +32,15 @@ rt_uint16_t BACK_COLOR = WHITE, FORE_COLOR = BLACK;
 #ifdef BSP_USING_ONBOARD_LCD_PWM_BL
     #define PWM_BL_NAME        "pwm14"              /* 背光PWM设备名称 */
     #define PWM_BL_CHANNEL     1                    /* 背光PWM通道 */
-    #define PWM_BL_PERIOD      500000               /* 0.5ms = 2000 Hz*/
+    #define PWM_BL_PERIOD      50000                /* 0.05ms = 20000 Hz*/
     struct rt_device_pwm *pwm_bl_dev = RT_NULL;     /* PWM设备句柄 */
 #else
     #define LCD_BL  GET_PIN(F, 9)
 #endif /* BSP_USING_ONBOARD_LCD_PWM_BL */
 
 #define LCD_RST GET_PIN(D, 3)
+#define LCD_BASE ((uint32_t)(0x68000000 | 0x0003FFFE)) // A18 link to DCX
+#define LCD ((LCD_CONTROLLER_TypeDef *)LCD_BASE)
 
 #define LCD_DEVICE(dev) (struct drv_lcd_device *)(dev)
 
@@ -117,15 +122,12 @@ uint16_t LCD_BGR2RGB(uint16_t c)
 // Ypos:纵坐标
 void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos)
 {
-    if (lcddev.id == 8552) // st7789v3
-    {
-        LCD_WR_REG(lcddev.setxcmd);
-        LCD_WR_DATA16(Xpos >> 8);
-        LCD_WR_DATA16(Xpos & 0XFF);
-        LCD_WR_REG(lcddev.setycmd);
-        LCD_WR_DATA16(Ypos >> 8);
-        LCD_WR_DATA16(Ypos & 0XFF);
-    }
+    LCD_WR_REG(lcddev.setxcmd);
+    LCD_WR_DATA16(Xpos >> 8);
+    LCD_WR_DATA16(Xpos & 0XFF);
+    LCD_WR_REG(lcddev.setycmd);
+    LCD_WR_DATA16(Ypos >> 8);
+    LCD_WR_DATA16(Ypos & 0XFF);
 }
 
 // 读取个某点的颜色值
@@ -141,11 +143,10 @@ void LCD_ReadPoint(char *pixel, int x, int y)
         return;
     }
     LCD_SetCursor(x, y);
-    if (lcddev.id == 0X81b3)
-        LCD_WR_REG(0X2E); // 9341/3510/1963 发送读GRAM指令
+
+    LCD_WR_REG(0X2E); // 9341/3510/1963 发送读GRAM指令
 
     r = LCD_RD_DATA8();      // dummy Read
-
     r = LCD_RD_DATA8(); // 实际坐标颜色
     b = LCD_RD_DATA8();
 
@@ -156,20 +157,14 @@ void LCD_ReadPoint(char *pixel, int x, int y)
 // LCD开启显示
 void LCD_DisplayOn(void)
 {
-    if (lcddev.id == 0X81b3)
-        LCD_WR_REG(0X29); // 开启显示
+    LCD_WR_REG(0X29); // 开启显示
 }
+
 // LCD关闭显示
 void LCD_DisplayOff(void)
 {
-    if (lcddev.id == 0X81b3)
-        LCD_WR_REG(0X28); // 关闭显示
+    LCD_WR_REG(0X28); // 关闭显示
 }
-
-
-#ifdef BSP_USING_ONBOARD_LCD_PWM_BL
-
-//TODO PWM14 not working
 
 // 初始化LCD背光定时器
 void LCD_PWM_BackLightInit()
@@ -212,107 +207,14 @@ void LCD_BackLightSet(uint8_t value)
         LOG_E("backlight set error!");
     }
 }
-#endif
-
 // 设置LCD的自动扫描方向(对RGB屏无效)
 // 注意:其他函数可能会受到此函数设置的影响(尤其是9341),
 // 所以,一般设置为L2R_U2D即可,如果设置为其他扫描方式,可能导致显示不正常.
 // dir:0~7,代表8个方向(具体定义见lcd.h)
-// 9341/5310/5510/1963等IC已经实际测试
+// TODO 刷新方向
 void LCD_Scan_Dir(uint8_t dir)
 {
-    uint16_t regval = 0;
-    uint16_t dirreg = 0;
-    uint16_t temp;
-    if ((lcddev.dir == 1 && lcddev.id != 0X1963) || (lcddev.dir == 0 && lcddev.id == 0X1963)) // 横屏时，对1963不改变扫描方向！竖屏时1963改变方向
-    {
-        switch (dir) // 方向转换
-        {
-        case 0:
-            dir = 6;
-            break;
-        case 1:
-            dir = 7;
-            break;
-        case 2:
-            dir = 4;
-            break;
-        case 3:
-            dir = 5;
-            break;
-        case 4:
-            dir = 1;
-            break;
-        case 5:
-            dir = 0;
-            break;
-        case 6:
-            dir = 3;
-            break;
-        case 7:
-            dir = 2;
-            break;
-        }
-    }
-    if (lcddev.id == 0x9341 || lcddev.id == 0X5310 || lcddev.id == 0X5510 || lcddev.id == 0X1963) // 9341/5310/5510/1963,特殊处理
-    {
-        switch (dir)
-        {
-        case L2R_U2D: // 从左到右,从上到下
-            regval |= (0 << 7) | (0 << 6) | (0 << 5);
-            break;
-        case L2R_D2U: // 从左到右,从下到上
-            regval |= (1 << 7) | (0 << 6) | (0 << 5);
-            break;
-        case R2L_U2D: // 从右到左,从上到下
-            regval |= (0 << 7) | (1 << 6) | (0 << 5);
-            break;
-        case R2L_D2U: // 从右到左,从下到上
-            regval |= (1 << 7) | (1 << 6) | (0 << 5);
-            break;
-        case U2D_L2R: // 从上到下,从左到右
-            regval |= (0 << 7) | (0 << 6) | (1 << 5);
-            break;
-        case U2D_R2L: // 从上到下,从右到左
-            regval |= (0 << 7) | (1 << 6) | (1 << 5);
-            break;
-        case D2U_L2R: // 从下到上,从左到右
-            regval |= (1 << 7) | (0 << 6) | (1 << 5);
-            break;
-        case D2U_R2L: // 从下到上,从右到左
-            regval |= (1 << 7) | (1 << 6) | (1 << 5);
-            break;
-        }
-        if (lcddev.id == 0X5510)
-            dirreg = 0X3600;
-        else
-            dirreg = 0X36;
-        if ((lcddev.id != 0X5310) && (lcddev.id != 0X5510) && (lcddev.id != 0X1963))
-            regval |= 0X08; // 5310/5510/1963不需要BGR
-        LCD_WriteReg(dirreg, regval);
-        if (lcddev.id != 0X1963) // 1963不做坐标处理
-        {
-            if (regval & 0X20)
-            {
-                if (lcddev.width < lcddev.height) // 交换X,Y
-                {
-                    temp = lcddev.width;
-                    lcddev.width = lcddev.height;
-                    lcddev.height = temp;
-                }
-            }
-            else
-            {
-                if (lcddev.width > lcddev.height) // 交换X,Y
-                {
-                    temp = lcddev.width;
-                    lcddev.width = lcddev.height;
-                    lcddev.height = temp;
-                }
-            }
-        }
 
-    }
 }
 
 // 快速画点
@@ -321,15 +223,13 @@ void LCD_Scan_Dir(uint8_t dir)
 static void LCD_Fast_DrawPoint(const char *pixel, int x, int y)
 {
     uint16_t color = *((uint16_t *)pixel);
-    if (lcddev.id == 0X81b3)
-    {
-        LCD_WR_REG(lcddev.setxcmd);
-        LCD_WR_DATA16(x >> 8);
-        LCD_WR_DATA16(x & 0XFF);
-        LCD_WR_REG(lcddev.setycmd);
-        LCD_WR_DATA16(y >> 8);
-        LCD_WR_DATA16(y & 0XFF);
-    }
+
+    LCD_WR_REG(lcddev.setxcmd);
+    LCD_WR_DATA16(x >> 8);
+    LCD_WR_DATA16(x & 0XFF);
+    LCD_WR_REG(lcddev.setycmd);
+    LCD_WR_DATA16(y >> 8);
+    LCD_WR_DATA16(y & 0XFF);
     LCD->_u8_REG = lcddev.wramcmd;
     LCD->_u16_RAM = color;
 }
@@ -343,36 +243,35 @@ void LCD_Display_Dir(uint8_t dir)
     {
         lcddev.width = 240;
         lcddev.height = 240;
-        if (lcddev.id == 0X81b3)
-        {
-            lcddev.wramcmd = 0X2C;
-            lcddev.setxcmd = 0X2A;
-            lcddev.setycmd = 0X2B;
-        }
+
+        lcddev.wramcmd = 0X2C;
+        lcddev.setxcmd = 0X2A;
+        lcddev.setycmd = 0X2B;
     }
     else // 横屏
     {
         lcddev.width = 240;
         lcddev.height = 240;
-        if (lcddev.id == 0X81b3)
-        {
-            lcddev.wramcmd = 0X2C;
-            lcddev.setxcmd = 0X2A;
-            lcddev.setycmd = 0X2B;
-        }
+
+        lcddev.wramcmd = 0X2C;
+        lcddev.setxcmd = 0X2A;
+        lcddev.setycmd = 0X2B;
     }
     // TODO scan dir settings
     // LCD_Scan_Dir(DFT_SCAN_DIR); //默认扫描方向
 }
 
-rt_err_t lcd_write_half_word(const rt_uint16_t da)
+static rt_err_t lcd_write_half_word(const rt_uint16_t da)
 {
+    uint16_t data = 0;
 
-    LCD_WR_DATA16(change_byte_order(da));
+    data = da >> 8;
+    data += (da & 0xff) << 8;
+    LCD_WR_DATA16(data);
     return RT_EOK;
 }
 
-rt_err_t lcd_write_data_buffer(const void *send_buf, rt_size_t length)
+static rt_err_t lcd_write_data_buffer(const void *send_buf, rt_size_t length)
 {
     uint8_t *pdata = RT_NULL;
     rt_size_t len = 0;
@@ -417,19 +316,18 @@ void lcd_set_color(rt_uint16_t back, rt_uint16_t fore)
  */
 void lcd_address_set(rt_uint16_t x1, rt_uint16_t y1, rt_uint16_t x2, rt_uint16_t y2)
 {
-    if (lcddev.id == 0X81b3) // st7789v3
-    {
-        LCD_WR_REG(lcddev.setxcmd);
-        LCD_WR_DATA8(x1 >> 8);
-        LCD_WR_DATA8(x1 & 0xff);
-        LCD_WR_DATA8(x2 >> 8);
-        LCD_WR_DATA8(x2 & 0xff);
-        LCD_WR_REG(lcddev.setycmd);
-        LCD_WR_DATA8(y1 >> 8);
-        LCD_WR_DATA8(y1 & 0xff);
-        LCD_WR_DATA8(y2 >> 8);
-        LCD_WR_DATA8(y2 & 0xff);
-    }
+
+    LCD_WR_REG(lcddev.setxcmd);
+    LCD_WR_DATA8(x1 >> 8);
+    LCD_WR_DATA8(x1 & 0xff);
+    LCD_WR_DATA8(x2 >> 8);
+    LCD_WR_DATA8(x2 & 0xff);
+    LCD_WR_REG(lcddev.setycmd);
+    LCD_WR_DATA8(y1 >> 8);
+    LCD_WR_DATA8(y1 & 0xff);
+    LCD_WR_DATA8(y2 >> 8);
+    LCD_WR_DATA8(y2 & 0xff);
+
     LCD_WriteRAM_Prepare();      // 开始写入GRAM
 }
 
@@ -445,11 +343,10 @@ void lcd_clear(rt_uint16_t color)
     uint32_t index = 0;
     uint32_t totalpoint = lcddev.width;
     totalpoint *= lcddev.height; // 得到总点数
-    LCD_SetCursor(0x00, 0x0000); // 设置光标位置
-    LCD_WriteRAM_Prepare();      // 开始写入GRAM
+    lcd_address_set(0, 0, lcddev.width - 1, lcddev.height - 1); // 设置光标位置
     for (index = 0; index < totalpoint; index++)
     {
-        LCD->_u16_RAM = color;
+        lcd_write_half_word(color);
     }
 }
 
@@ -464,13 +361,9 @@ void lcd_clear(rt_uint16_t color)
 void lcd_draw_point(rt_uint16_t x, rt_uint16_t y)
 {
     lcd_address_set(x, y, x, y);
-    lcd_write_half_word(BLUE);
+    lcd_write_half_word(FORE_COLOR);
 }
 
-rt_uint16_t change_byte_order(rt_uint16_t word)
-{
-    return ((word<<8)&0xff00) | ((word>>8)&0x00ff);
-}
 
 /**
  * full color on the lcd.
@@ -1196,7 +1089,14 @@ void LCD_BlitLine(const char *pixel, int x, int y, rt_size_t size)
         LCD->_u16_RAM = *p;
 }
 
-int drv_lcd_init(void)
+#ifdef BSP_USING_ONBOARD_LCD_TEAREFFECT
+__weak void lcd_teareffect_isr()   // 60hz
+{
+
+}
+#endif /* BSP_USING_ONBOARD_LCD_TEAREFFECT */
+
+rt_err_t drv_lcd_init(struct rt_device *device)
 {
 
     SRAM_HandleTypeDef hsram1 = {0};
@@ -1207,6 +1107,10 @@ int drv_lcd_init(void)
     rt_pin_mode(LCD_BL, PIN_MODE_OUTPUT);
 #endif /* BSP_USING_ONBOARD_LCD_PWM_BL */
 
+#ifdef BSP_USING_ONBOARD_LCD_TEAREFFECT
+    rt_pin_mode(LCD_TE_PIN, PIN_MODE_INPUT_PULLUP);
+    rt_pin_attach_irq(LCD_TE_PIN, PIN_IRQ_MODE_RISING, lcd_teareffect_isr, RT_NULL);
+#endif /* BSP_USING_ONBOARD_LCD_TEAREFFECT */
     rt_pin_mode(LCD_RST, PIN_MODE_OUTPUT);
 
     rt_pin_write(LCD_RST, PIN_LOW);
@@ -1236,22 +1140,22 @@ int drv_lcd_init(void)
     hsram1.Init.PageSize = FSMC_PAGE_SIZE_NONE;
     // /* Timing */
 
-    read_timing.AddressSetupTime = 0XF;	 //地址建立时间（ADDSET）为16个HCLK 1/168M=6ns*16=96ns
-    read_timing.AddressHoldTime = 0x00;	 //地址保持时间（ADDHLD）模式A未用到
+    read_timing.AddressSetupTime = 0XF;	 //地址建立时间（ADDSET）为16个HCLK 1/168M=6ns*16=96ns	
+    read_timing.AddressHoldTime = 0x00;	 //地址保持时间（ADDHLD）模式A未用到	
     read_timing.DataSetupTime = 60;			//数据保存时间为60个HCLK	=6*60=360ns
     read_timing.BusTurnAroundDuration = 0x00;
     read_timing.CLKDivision = 0x00;
     read_timing.DataLatency = 0x00;
-    read_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A
+    read_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A 
 
 
-    write_timing.AddressSetupTime =9;	      //地址建立时间（ADDSET）为9个HCLK =54ns
-    write_timing.AddressHoldTime = 0x00;	 //地址保持时间（A
+    write_timing.AddressSetupTime =9;	      //地址建立时间（ADDSET）为9个HCLK =54ns 
+    write_timing.AddressHoldTime = 0x00;	 //地址保持时间（A		
     write_timing.DataSetupTime = 8;		 //数据保存时间为6ns*9个HCLK=54ns
     write_timing.BusTurnAroundDuration = 0x00;
     write_timing.CLKDivision = 0x00;
     write_timing.DataLatency = 0x00;
-    write_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A
+    write_timing.AccessMode = FSMC_ACCESS_MODE_A;	 //模式A 
 
     if (HAL_SRAM_Init(&hsram1, &read_timing, &write_timing) != HAL_OK)
     {
@@ -1269,94 +1173,94 @@ int drv_lcd_init(void)
     lcddev.id |= LCD_RD_DATA8();
 
     LOG_I(" LCD ID:%x", lcddev.id); // 打印LCD ID
-    if (lcddev.id == 0X81b3) //st7789v3
-    {
-        //************* Start Initial Sequence **********//
-        /* Memory Data Access Control */
-        LCD_WR_REG(0x36);
-        LCD_WR_DATA8(0x00);
-        /* RGB 5-6-5-bit  */
-        LCD_WR_REG(0x3A); 
-        LCD_WR_DATA8(0x65);
-        /* Porch Setting */
-        LCD_WR_REG(0xB2);
-        LCD_WR_DATA8(0x0C);
-        LCD_WR_DATA8(0x0C);
-        LCD_WR_DATA8(0x00);
-        LCD_WR_DATA8(0x33);
-        LCD_WR_DATA8(0x33); 
-        /*  Gate Control */
-        LCD_WR_REG(0xB7); 
-        LCD_WR_DATA8(0x35);  
-        /* VCOM Setting */
-        LCD_WR_REG(0xBB);
-        LCD_WR_DATA8(0x37);
-        /* LCM Control */
-        LCD_WR_REG(0xC0);
-        LCD_WR_DATA8(0x2C);
-        /* VDV and VRH Command Enable */
-        LCD_WR_REG(0xC2);
-        LCD_WR_DATA8(0x01);
-        /* VRH Set */
-        LCD_WR_REG(0xC3);
-        LCD_WR_DATA8(0x12);   
-        /* VDV Set */
-        LCD_WR_REG(0xC4);
-        LCD_WR_DATA8(0x20);  
-        /* Frame Rate Control in Normal Mode */
-        LCD_WR_REG(0xC6); 
-        LCD_WR_DATA8(0x0F);    
-        /* Power Control 1 */
-        LCD_WR_REG(0xD0); 
-        LCD_WR_DATA8(0xA4);
-        LCD_WR_DATA8(0xA1);
-        /* Positive Voltage Gamma Control */
-        LCD_WR_REG(0xE0);
-        LCD_WR_DATA8(0xD0);
-        LCD_WR_DATA8(0x04);
-        LCD_WR_DATA8(0x0D);
-        LCD_WR_DATA8(0x11);
-        LCD_WR_DATA8(0x13);
-        LCD_WR_DATA8(0x2B);
-        LCD_WR_DATA8(0x3F);
-        LCD_WR_DATA8(0x54);
-        LCD_WR_DATA8(0x4C);
-        LCD_WR_DATA8(0x18);
-        LCD_WR_DATA8(0x0D);
-        LCD_WR_DATA8(0x0B);
-        LCD_WR_DATA8(0x1F);
-        LCD_WR_DATA8(0x23);
-        /* Negative Voltage Gamma Control */
-        LCD_WR_REG(0xE1);
-        LCD_WR_DATA8(0xD0);
-        LCD_WR_DATA8(0x04);
-        LCD_WR_DATA8(0x0C);
-        LCD_WR_DATA8(0x11);
-        LCD_WR_DATA8(0x13);
-        LCD_WR_DATA8(0x2C);
-        LCD_WR_DATA8(0x3F);
-        LCD_WR_DATA8(0x44);
-        LCD_WR_DATA8(0x51);
-        LCD_WR_DATA8(0x2F);
-        LCD_WR_DATA8(0x1F);
-        LCD_WR_DATA8(0x1F);
-        LCD_WR_DATA8(0x20);
-        LCD_WR_DATA8(0x23);
-        /* Display Inversion On */
-        LCD_WR_REG(0x21);       // 开启反色
-        /* TearEffect Sync On */
-        LCD_WR_REG(0x35);       // 开启TE
-        LCD_WR_DATA8(0x00);     // TE 同步方式：vsync 同步
-        /* Sleep Out */
-        LCD_WR_REG(0x11); 
 
-        rt_thread_mdelay(120);
-        /* display on */
-        LCD_WR_REG(0x29);       // 开启显示
-    }
+    //************* Start Initial Sequence **********//
+    /* Memory Data Access Control */
+    LCD_WR_REG(0x36);
+    LCD_WR_DATA8(0x00);
+    /* RGB 5-6-5-bit  */
+    LCD_WR_REG(0x3A); 
+    LCD_WR_DATA8(0x65);
+    /* Porch Setting */
+    LCD_WR_REG(0xB2);
+    LCD_WR_DATA8(0x0C);
+    LCD_WR_DATA8(0x0C);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x33);
+    LCD_WR_DATA8(0x33); 
+    /*  Gate Control */
+    LCD_WR_REG(0xB7); 
+    LCD_WR_DATA8(0x35);  
+    /* VCOM Setting */
+    LCD_WR_REG(0xBB);
+    LCD_WR_DATA8(0x37);
+    /* LCM Control */
+    LCD_WR_REG(0xC0);
+    LCD_WR_DATA8(0x2C);
+    /* VDV and VRH Command Enable */
+    LCD_WR_REG(0xC2);
+    LCD_WR_DATA8(0x01);
+    /* VRH Set */
+    LCD_WR_REG(0xC3);
+    LCD_WR_DATA8(0x12);   
+    /* VDV Set */
+    LCD_WR_REG(0xC4);
+    LCD_WR_DATA8(0x20);  
+    /* Frame Rate Control in Normal Mode */
+    LCD_WR_REG(0xC6); 
+    LCD_WR_DATA8(0x0F);    
+    /* Power Control 1 */
+    LCD_WR_REG(0xD0); 
+    LCD_WR_DATA8(0xA4);
+    LCD_WR_DATA8(0xA1);
+    /* Positive Voltage Gamma Control */
+    LCD_WR_REG(0xE0);
+    LCD_WR_DATA8(0xD0);
+    LCD_WR_DATA8(0x04);
+    LCD_WR_DATA8(0x0D);
+    LCD_WR_DATA8(0x11);
+    LCD_WR_DATA8(0x13);
+    LCD_WR_DATA8(0x2B);
+    LCD_WR_DATA8(0x3F);
+    LCD_WR_DATA8(0x54);
+    LCD_WR_DATA8(0x4C);
+    LCD_WR_DATA8(0x18);
+    LCD_WR_DATA8(0x0D);
+    LCD_WR_DATA8(0x0B);
+    LCD_WR_DATA8(0x1F);
+    LCD_WR_DATA8(0x23);
+    /* Negative Voltage Gamma Control */
+    LCD_WR_REG(0xE1);
+    LCD_WR_DATA8(0xD0);
+    LCD_WR_DATA8(0x04);
+    LCD_WR_DATA8(0x0C);
+    LCD_WR_DATA8(0x11);
+    LCD_WR_DATA8(0x13);
+    LCD_WR_DATA8(0x2C);
+    LCD_WR_DATA8(0x3F);
+    LCD_WR_DATA8(0x44);
+    LCD_WR_DATA8(0x51);
+    LCD_WR_DATA8(0x2F);
+    LCD_WR_DATA8(0x1F);
+    LCD_WR_DATA8(0x1F);
+    LCD_WR_DATA8(0x20);
+    LCD_WR_DATA8(0x23);
+    /* Display Inversion On */
+    LCD_WR_REG(0x21);       // 开启反色
+#ifdef BSP_USING_ONBOARD_LCD_TEAREFFECT
+    /* TearEffect Sync On */
+    LCD_WR_REG(0x35);       // 开启TE
+    LCD_WR_DATA8(0x00);     // TE 同步方式：vsync 同步
+#endif /* BSP_USING_ONBOARD_LCD_TEAREFFECT */
+    /* Sleep Out */
+    LCD_WR_REG(0x11); 
+
+    rt_thread_mdelay(120);
+    /* display on */
+    LCD_WR_REG(0x29);       // 开启显示
 
     // 初始化完成以后,提速
-    if (lcddev.id == 0X81b3) //st7789v3可以设置WR时序为最快
+    // st7789v3可以设置WR时序为最快
     {
         // 重新配置写时序控制寄存器的时序
         FSMC_Bank1E->BWTR[6] &= ~(0XF << 0); // 地址建立时间(ADDSET)清零
@@ -1365,6 +1269,8 @@ int drv_lcd_init(void)
         FSMC_Bank1E->BWTR[6] |= 2 << 8;      // 数据保存时间(DATAST)为6ns*3个HCLK=18ns
     }
     LCD_Display_Dir(0); // 默认为横屏
+    lcd_clear(WHITE);
+
 #ifdef BSP_USING_ONBOARD_LCD_PWM_BL
     LCD_PWM_BackLightInit();
     LCD_BackLightSet(80);
@@ -1372,7 +1278,10 @@ int drv_lcd_init(void)
     rt_pin_write(LCD_BL, PIN_HIGH); // 开启背光
 #endif /* BSP_USING_ONBOARD_LCD_PWM_BL */
 
-    lcd_clear(WHITE);
+#ifdef BSP_USING_ONBOARD_LCD_TEAREFFECT
+    rt_pin_irq_enable(LCD_TE_PIN, PIN_IRQ_ENABLE);
+#endif /* BSP_USING_ONBOARD_LCD_TEAREFFECT */
+
 
     return RT_EOK;
 }
@@ -1435,7 +1344,7 @@ int drv_lcd_hw_init(void)
 #ifdef RT_USING_DEVICE_OPS
     device->ops = &lcd_ops;
 #else
-    device->init = NULL;
+    device->init = drv_lcd_init;
     device->control = drv_lcd_control;
 #endif
     device->user_data = &fsmc_lcd_ops;

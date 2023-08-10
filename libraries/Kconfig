@@ -28,8 +28,7 @@ menu "Onboard Peripheral Drivers"
         default y
 
     config BSP_USING_COM2
-        bool "Enable COM2 (uart2 pin conflict with Ethernet and PWM)"
-        depends on (!BSP_USING_ETH && !BSP_USING_PWM)
+        bool "Enable COM2 (uart2)"
         select BSP_USING_UART
         select BSP_USING_UART2
         default n
@@ -65,16 +64,22 @@ menu "Onboard Peripheral Drivers"
         default n
 
     config BSP_USING_ONBOARD_LCD
-        bool "Enable LCD(ST7787)"
-        select BSP_USING_SRAM
+        bool "Enable onboard LCD (ST7789)"
+        select BSP_USING_EXT_FMC_IO
+        select BSP_USING_FMC
         default n
         if BSP_USING_ONBOARD_LCD
             config BSP_USING_ONBOARD_LCD_PWM_BL
-                bool "Enable pwm background light"
-                default y
+                bool "Enable pwm backlight using TIM14_CH1"
                 select BSP_USING_PWM
                 select BSP_USING_PWM14
-                select BSP_USING_PWM14_CH1
+                default n
+            config BSP_USING_ONBOARD_LCD_TEAREFFECT
+                bool "Enable LCD TearingEffect protection"
+                default n
+            config BSP_USING_ONBOARD_LCD_TEST
+                bool "Enable lcd fill test"
+                default y
         endif
 
 	config BSP_USING_ONBOARD_LED_MATRIX
@@ -108,11 +113,6 @@ menu "Onboard Peripheral Drivers"
         select BSP_USING_SPI2
         select RT_USING_SFUD
         select RT_SFUD_USING_SFDP
-        default n
-
-    config BSP_USING_EEPROM
-        bool "Enable I2C EEPROM (i2c1)"
-        select BSP_USING_I2C1
         default n
 
 	config BSP_USING_ENC28j60
@@ -154,6 +154,7 @@ menu "Onboard Peripheral Drivers"
     config BSP_USING_FAL
 		bool "Enable FAL (enable on-chip flash and spi2 flash)"
 		select BSP_USING_SPI_FLASH
+        select BSP_USING_ON_CHIP_FLASH
 		select RT_USING_FAL
 		select FAL_DEBUG_CONFIG
 		select FAL_PART_HAS_TABLE_CFG
@@ -209,12 +210,6 @@ menu "Onboard Peripheral Drivers"
         select RT_USB_DEVICE_HID
         select RT_USB_DEVICE_HID_MOUSE
         select BSP_USING_ICM20608
-
-    config BSP_USING_EASYFLASH
-        bool "Enable Easy Flash base on FAL"
-        select BSP_USING_FAL
-        select PKG_USING_EASYFLASH
-        default n
 
     menuconfig BSP_USING_CAN
         bool "Enable On Board CAN"
@@ -483,7 +478,7 @@ menu "On-chip Peripheral Drivers"
                 default n
 
             config BSP_USING_SPI2
-                bool "Enable SPI2 BUS"
+                bool "Enable SPI2 BUS for NorFlash and RW007 onboard"
                 default n
 
             config BSP_SPI2_TX_USING_DMA
