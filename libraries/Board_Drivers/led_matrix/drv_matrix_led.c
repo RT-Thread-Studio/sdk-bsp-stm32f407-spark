@@ -77,7 +77,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
  * @param None
  * @retval None
  */
-static int matrix_init(void)
+static void matrix_init(void)
 {
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     TIM_OC_InitTypeDef sConfigOC = {0};
@@ -139,8 +139,8 @@ static int matrix_init(void)
 
     rt_pin_mode(LED_MATRIX_EN_PIN, PIN_MODE_OUTPUT);
     rt_pin_write(LED_MATRIX_EN_PIN, PIN_LOW);
+
     led_matrix_rst();
-    return RT_EOK;
 
 }
 
@@ -158,7 +158,7 @@ void Set_LEDColor(uint16_t LedId, RGBColor_TypeDef Color)
 }
 
 /**
- * @brief			TIM发送控制ws2812
+ * @brief			使用DMA方式发送一整个阵列缓存
  * @param[in]		待发送缓存
  */
 static void TIM_Send_WS2812(uint8_t *rgb_buffer, uint32_t size)

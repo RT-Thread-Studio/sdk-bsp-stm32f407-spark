@@ -29,7 +29,7 @@ SPI FLASH 在开发板中的位置如下图所示：
 在示例代码中会执行如下操作：
 
 1. 使用 `fal_blk_device_create()` 函数在 spi flash 中名为 "filesystem" 的分区上创建一个块设备，作为文件系统的存储设备。
-2. 使用 `dfs_mount()` 函数将该块设备中的文件系统挂载到根目录 `/` 上。
+2. 使用 `dfs_mount()` 函数将该块设备中的文件系统挂载到根目录下的 `/fal` 目录上。
 
 ```c
 #define FS_PARTITION_NAME  "filesystem"
@@ -51,7 +51,7 @@ int main(void)
     }
 
     /* 挂载 spi flash 中名为 "filesystem" 的分区上的文件系统 */
-    if (dfs_mount(flash_dev->parent.name, "/", "elm", 0, 0) == 0)
+    if (dfs_mount(flash_dev->parent.name, "/fal", "elm", 0, 0) == 0)
     {
         LOG_I("Filesystem initialized!");
     }
@@ -116,47 +116,56 @@ msh />
 ```shell
 msh />ls                          # 使用 ls 命令查看文件系统目录信息
 Directory /:                      # 可以看到已经存在根目录 /
+fal                 <DIR>         # ROMFS 内置的fal目录
+```
+
+### cd：切换目录到FAL
+
+```shell
+msh />cd fal                      # 使用 cd 命令切换当前目录
+msh /fal>
 ```
 
 ### mkdir: 创建文件夹
+
 ```shell
-msh />mkdir rt-thread             # 创建 rt-thread 文件夹
-msh />ls                          # 查看目录信息如下
-Directory /:
+msh /fal>mkdir rt-thread             # 创建 rt-thread 文件夹
+msh /fal>ls                          # 查看目录信息如下
+Directory /fal:
 rt-thread           <DIR>
 ```
 
 ### echo: 将输入的字符串输出到指定输出位置
 ```shell
-msh />echo "hello rt-thread!!!"             # 将字符串输出到标准输出
+msh /fal>echo "hello rt-thread!!!"             # 将字符串输出到标准输出
 hello rt-thread!!!
-msh />echo "hello rt-thread!!!" hello.txt   # 将字符串出输出到 hello.txt
-msh />ls
-Directory /:
+msh /fal>echo "hello rt-thread!!!" hello.txt   # 将字符串出输出到 hello.txt
+msh /fal>ls
+Directory /fal:
 rt-thread           <DIR>
 hello.txt           18
-msh />
+msh /fal>
 
 ### cat: 查看文件内容
 ​```shell
-msh />cat hello.txt                     # 查看 hello.txt 文件的内容并输出
+msh /fal>cat hello.txt                     # 查看 hello.txt 文件的内容并输出
 hello rt-thread!!!
 ```
 
 ### rm: 删除文件夹或文件
 ```shell
-msh />ls                                # 查看当前目录信息
-Directory /:
+msh /fal>ls                                # 查看当前目录信息
+Directory /fal:
 rt-thread           <DIR>
 hello.txt           18
-msh />rm rt-thread                      # 删除 rt-thread 文件夹
-msh />ls
-Directory /:
+msh /fal>rm rt-thread                      # 删除 rt-thread 文件夹
+msh /fal>ls
+Directory /fal:
 hello.txt           18
-msh />rm hello.txt                      # 删除 hello.txt 文件
-msh />ls
+msh /fal>rm hello.txt                      # 删除 hello.txt 文件
+msh /fal>ls
 Directory /:
-msh />
+msh /fal>
 ```
 ## 注意事项
 

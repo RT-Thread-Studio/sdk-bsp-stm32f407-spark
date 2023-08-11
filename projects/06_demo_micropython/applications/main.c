@@ -15,6 +15,7 @@
 
 #define LOG_TAG               "main"
 
+
 #define FS_PARTITION_NAME     "filesystem"
 
 int main(void)

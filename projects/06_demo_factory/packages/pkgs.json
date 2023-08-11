@@ -1,0 +1,42 @@
+[
+ {
+  "path": "/packages/iot/WiFi/rw007", 
+  "ver": "v2.0.1", 
+  "name": "RW007"
+ }, 
+ {
+  "path": "/packages/multimedia/LVGL/LVGL", 
+  "ver": "v8.3.5", 
+  "name": "LVGL"
+ }, 
+ {
+  "path": "/packages/multimedia/wavplayer", 
+  "ver": "v0.2.0", 
+  "name": "WAVPLAYER"
+ }, 
+ {
+  "path": "/packages/system/littlefs", 
+  "ver": "v2.5.0", 
+  "name": "LITTLEFS"
+ }, 
+ {
+  "path": "/packages/peripherals/sensors/aht10", 
+  "ver": "v2.1.0", 
+  "name": "AHT10"
+ }, 
+ {
+  "path": "/packages/peripherals/sensors/ap3216c", 
+  "ver": "v2.0.0", 
+  "name": "AP3216C"
+ }, 
+ {
+  "path": "/packages/peripherals/sensors/icm20608", 
+  "ver": "v1.0.0", 
+  "name": "ICM20608"
+ }, 
+ {
+  "path": "/packages/misc/optparse", 
+  "ver": "v1.0.0", 
+  "name": "OPTPARSE"
+ }
+]
