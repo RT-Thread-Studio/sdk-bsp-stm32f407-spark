@@ -11,8 +11,6 @@
 ```
 |-- README.md
 |-- docs
-|   |-- SCH_Spark-1_V1_0.pdf
-|   `-- images
 |-- libraries
 |   |-- Board_Drivers
 |   |-- HAL_Drivers
@@ -22,7 +20,7 @@
 `-- sdk-bsp-rt-spark.yaml
 ```
 
-- docs：星火 1 号原理图、用户手册
+- docs：星火 1 号原理图、用户手册等
 - libraries：STM32F4 固件库、通用外接驱动程序
 - projects：示例项目文件夹，包括各种示例代码
 - rt-thread：rt-thread 源代码

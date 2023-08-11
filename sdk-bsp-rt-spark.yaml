@@ -28,9 +28,15 @@ chip:
   rx_name: PA10
   uart_name: UART1
 docs:
-- category: other
-  file: docs/星火1号开发板原理图_V1_0.pdf
+- file: docs/星火1号开发板原理图_V1_0.pdf
   title: 星火1号开发板原理图
+  category: other
+- file: docs/RT-Thread 内核学习手册.pdf
+  title: 基于星火1号的内核学习手册
+  category: manual
+- file: docs/星火1号用户手册_V1.0.0.pdf
+  title: 星火1号用户手册
+  category: manual
 features:
 - 'On-chip Flash:1024KB'
 - 'SRAM:196KB (including 64KB CCM)'
