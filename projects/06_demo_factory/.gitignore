@@ -40,3 +40,4 @@ settings/
 *.uvguix*
 cconfig.h
 libraries
+rt-thread
