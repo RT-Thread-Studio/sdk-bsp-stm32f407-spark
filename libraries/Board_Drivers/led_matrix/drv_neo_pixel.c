@@ -10,6 +10,7 @@
 
 #include <board.h>
 #include <drv_neo_pixel.h>
+#include <string.h>
 
 #if defined(BSP_USING_LED_MATRIX) && defined(BSP_USING_NEOPIXEL)
 
@@ -598,6 +599,8 @@ void show(void)
     uint8_t *p;
     pixel_rgb_t c;
 
+    //TODO use IT solution
+    rt_thread_mdelay(3); // delay 3ms maxim for one buffer blocking time.
     for (uint16_t i = 0; i < numLEDs; i++)
     {
         if (wOffset == rOffset)

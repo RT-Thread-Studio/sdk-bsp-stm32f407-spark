@@ -237,7 +237,6 @@ INIT_APP_EXPORT(led_matrix_init);
 //TODO 多线程重入处理
 static void tim_dma_send_raw(uint8_t *raw_buffer, uint32_t size)
 {
-    rt_base_t level = rt_hw_interrupt_disable(); // DMA send 期间多线程访问保护
 #if defined (BSP_USING_ONBOARD_LED_MATRIX) && defined (BSP_USING_EXT_LED_MATRIX)
     uint16_t offset = (BSP_ONBOAR_LED_NUMS * 24 * 2);
     int16_t ext_size = size - (BSP_ONBOAR_LED_NUMS * 24);
@@ -269,7 +268,6 @@ static void tim_dma_send_raw(uint8_t *raw_buffer, uint32_t size)
     // 发送一个24bit的RGB数据
     HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_1, (uint32_t *)raw_buffer, size);
 #endif
-    rt_hw_interrupt_enable(level);
 }
 
 /**

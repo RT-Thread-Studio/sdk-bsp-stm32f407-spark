@@ -23,15 +23,17 @@ int main(void)
 
     /* 初始化 neo_pixel 库 */
     neo_pixel_init(&neo_ops, LED_NUMS);
+    /* 等待驱动初始化完成 */
+    rt_thread_mdelay(10);
 
     while (1)
     {
         /* 生成彩虹序列 */
         neo_ops->tool->rainbow(hue, LED_REPS, LED_SATURATION, LED_BRIGHTNESS, RT_TRUE);
-        /* 刷新周期10ms */
-        rt_thread_mdelay(10);
         /* 显示 */
         neo_ops->show();
+        /* 刷新周期10ms */
+        rt_thread_mdelay(10);
         hue += 100;
     }
     return 0;
