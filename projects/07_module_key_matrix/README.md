@@ -2,18 +2,17 @@
 
 ## 简介
 
-本例程主要功能是通过板载的PMOD1接口和转接板，将4*4矩阵按键接入开发板，PMOD2也可以用，但是需要改引脚信息。
+本例程主要功能是通过板载的 PMOD1 接口和转接板，将 4×4 矩阵按键接入开发板，PMOD2 也可以用，但是需要改引脚信息。
 
 ## 硬件说明
 
-![image-20230918142454847](figures/key_circuit.png)
+PMOD1 接口（P1）的原理图如下：
 
+![pmod1 原理图](figures/key_circuit.png)
 
+PMOD1 接口 在开发板中的位置如下图所示：
 
-PMOD1接口 在开发板中的位置如下图所示：
-
-![image-20230918143358650](figures/board.png)
-
+![pmod1 位置](figures/board.png)
 
 ## 软件说明
 
@@ -29,38 +28,38 @@ PMOD1接口 在开发板中的位置如下图所示：
 #define PIN_ROW4        GET_PIN(A,5)      // PA5:  ROW4
 ```
 
-按键输入的源代码位于 `\projects\07_module_key_matrix/applications/main.c` 中。流程如下，将四个行引脚放到一个数组中，四个列引脚放到另一个数组中，初始化引脚，行引脚设为输出模式，列引脚设为上拉输入模式，用双层for循环先扫描行再扫描列。返回键值，在主函数打印出按键按下对应的数值。
+按键输入的源代码位于 `\projects\07_module_key_matrix/applications/main.c` 中。流程如下，将四个行引脚放到一个数组中，四个列引脚放到另一个数组中，初始化引脚，行引脚设为输出模式，列引脚设为上拉输入模式，用双层 for 循环先扫描行再扫描列。返回键值，在主函数打印出按键按下对应的数值。
 
 ```c
-/* 定义列的四个IO在一个数组*/
+/* 定义列的四个 IO 在一个数组 */
 unsigned int ROW_PINS[ROWS] = {PIN_ROW1, PIN_ROW2, PIN_ROW3, PIN_ROW4};
 unsigned int COL_PINS[COLS] = {PIN_COL1, PIN_COL2, PIN_COL3, PIN_COL4};
 
-/* 八个IO口模式设置  */
+/* 八个 IO 口模式设置  */
 void key_scan_init()
 {
     for (int i = 0; i < ROWS; i++)
     {
-        /* 配置行IO为输出模式*/
+        /* 配置行 IO 为输出模式 */
         rt_pin_mode(ROW_PINS[i], PIN_MODE_OUTPUT);
-        /* 初始化行IO为高电平 */
+        /* 初始化行 IO 为高电平 */
         rt_pin_write(ROW_PINS[i], PIN_HIGH);
     }
     for (int j = 0; j < COLS; j++)
     {
-        /* 配置列IO为上拉输入模式*/
+        /* 配置列 IO 为上拉输入模式 */
         rt_pin_mode(COL_PINS[j], PIN_MODE_INPUT_PULLUP);
     }
 }
 /* 按键扫描处理函数 */
 int key_scan()
 {
-    /* 依次扫描行的四个IO */
+    /* 依次扫描行的四个 IO */
     for (int row = 0 ; row < ROWS ; row++)
     {
         /* 扫描的行置低电平，其余为高电平 */
         rt_pin_write(ROW_PINS[row], PIN_LOW);
-        /* 依次扫描列的四个IO */
+        /* 依次扫描列的四个 IO */
         for (int COL = 0 ; COL < COLS ; COL++)
         {
             if (rt_pin_read(COL_PINS[COL]) == PIN_LOW)
@@ -86,7 +85,7 @@ int main(void)
     /* 按键初始化 */
     key_scan_init();
 
-    while (count > 0)
+    while (count> 0)
     {
         int key = key_scan();
         switch (key)

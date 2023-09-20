@@ -41,29 +41,29 @@ rt_thread_t led_matrix_thread;
 static void led_matrix_example_entry()
 {
     int count = 0;
-    while(1)
+    while (1)
     {
-        for(int i=EXTERN_LED_0; i<=EXTERN_LED_18; i++)
+        for (int i = EXTERN_LED_0; i <= EXTERN_LED_18; i++)
         {
             switch (count)
             {
             case 0:
-                Set_LEDColor(i,RED);
+                led_matrix_set_color(i, RED);
                 break;
             case 1:
-                Set_LEDColor(i,GREEN);
+                led_matrix_set_color(i, GREEN);
                 break;
             case 2:
-                Set_LEDColor(i,BLUE);
+                led_matrix_set_color(i, BLUE);
                 break;
             default:
-                return ;
+                return;
                 break;
             }
-            RGB_Reflash();
+            led_matrix_reflash();
             rt_thread_delay(20);
         }
-        count = (count+1) % 3; 
+        count = (count + 1) % 3;
     }
 }
 
@@ -75,6 +75,7 @@ int main(void)
         rt_kprintf("led matrix demo thread creat failed!\n");
         return 0;
     }
+    rt_thread_mdelay(200); // avoid multi-thread on LED matrix transmit.
     rt_thread_startup(led_matrix_thread);
 
     return 0;

@@ -44,10 +44,10 @@ static rt_uint8_t *last_buff = rs485_receive_buf1;
 
 static rt_sem_t rs_485_receive_ready = RT_NULL;
 
-static void intern_led_control(rt_led_node_t *node, RGBColor_TypeDef color)
+static void intern_led_control(rt_led_node_t *node, pixel_rgb_t color)
 {
-    Set_LEDColor(node->pin, color);
-    RGB_Reflash();
+    led_matrix_set_color(node->pin, color);
+    led_matrix_reflash();
     node->status = color;
 }
 
@@ -117,7 +117,7 @@ void led_matrix_slave_task_entry()
         {
             continue;
         }
-        RGBColor_TypeDef color = *(RGBColor_TypeDef *)(&(last_buff[2]));
+        pixel_rgb_t color = *(pixel_rgb_t *)(&(last_buff[2]));
         led_matrix[led_no].io_ctl(&led_matrix[led_no],color);
     }
 }
