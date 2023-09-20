@@ -1080,7 +1080,7 @@ example_projects:
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 07_module_key_matrix
-  project_description: 薄膜键盘模块例程
+  project_description: 矩阵键盘模块例程
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
   - source_path_offset: projects/07_module_key_matrix
@@ -1109,10 +1109,39 @@ example_projects:
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 07_module_spi_eth_enc28j60
-  project_description: PMOD ENC28J60 以太网模块例程
+  project_description: ENC28J60 网络模块例程
   project_type: rt-thread|@full|@4.1.1
   builtin_files:
   - source_path_offset: projects/07_module_spi_eth_enc28j60
+    target_path_offset: ''
+    files_and_folders:
+    - "*"
+  - source_path_offset: ''
+    target_path_offset: ''
+    files_and_folders:
+    - libraries
+  external_files:
+  - files_and_folders:
+    - components
+    - include
+    - libcpu/arm
+    - libcpu/Kconfig
+    - libcpu/SConscript
+    - src
+    - tools
+    - Kconfig
+    - LICENSE
+    package_name: RT-Thread
+    package_type: RT-Thread_Source_Code
+    package_vendor: ''
+    package_version: 4.1.1
+    source_path_offset: ''
+    target_path_offset: rt-thread
+- project_name: 07_module_ultrasonic_sr04
+  project_description: 超声波测距模块例程
+  project_type: rt-thread|@full|@4.1.1
+  builtin_files:
+  - source_path_offset: projects/07_module_ultrasonic_sr04
     target_path_offset: ''
     files_and_folders:
     - "*"
