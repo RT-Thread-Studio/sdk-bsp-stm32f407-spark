@@ -61,7 +61,7 @@ features_zh:
 - '更多...'
 pkg_type: Board_Support_Packages
 pkg_vendor: rtt
-pkg_version: 1.0.0
+pkg_version: 1.1.0
 template_projects:
 - builtin_files:
   - source_path_offset: projects/02_basic_led_blink
