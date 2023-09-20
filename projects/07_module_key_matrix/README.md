@@ -175,7 +175,7 @@ int main(void)
 [D/main] 7
 [D/main] 8
 [D/main] 9
-[D/main] D
+[D/main] C
 [D/main] *
 [D/main] 0
 [D/main] #

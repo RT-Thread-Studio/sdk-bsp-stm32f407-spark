@@ -8,13 +8,12 @@
  * 2018-08-27     ZYLX              the first version
  */
 
-#include <drivers/pin.h>
+#include <rtdevice.h>
 #include <enc28j60.h>
 #include "drv_spi.h"
 #include "board.h"
 
 #define PIN_NRF_IRQ             GET_PIN(E,2)
-
 
 int enc28j60_init(void)
 {
@@ -26,7 +25,7 @@ int enc28j60_init(void)
 
     /* init interrupt pin */
     rt_pin_mode(PIN_NRF_IRQ, PIN_MODE_INPUT_PULLUP);
-    rt_pin_attach_irq(PIN_NRF_IRQ, PIN_IRQ_MODE_FALLING, (void(*)(void*))enc28j60_isr, RT_NULL);
+    rt_pin_attach_irq(PIN_NRF_IRQ, PIN_IRQ_MODE_FALLING, (void(*)(void *))enc28j60_isr, RT_NULL);
     rt_pin_irq_enable(PIN_NRF_IRQ, PIN_IRQ_ENABLE);
 
     return 0;
