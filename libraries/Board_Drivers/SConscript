@@ -40,6 +40,9 @@ if GetDepend(['BSP_USING_ONBOARD_LED_MATRIX']):
 	src += Glob('led_matrix/drv_matrix_led.c')
 	path += [cwd + '/led_matrix']
 
+if GetDepend(['BSP_USING_NEOPIXEL']):
+	src += Glob('led_matrix/drv_neo_pixel.c')
+
 if GetDepend(['BSP_USING_EASYFLASH']):
     src += Glob('ef_fal_port.c')
 

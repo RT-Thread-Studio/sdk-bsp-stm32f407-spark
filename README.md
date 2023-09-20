@@ -72,6 +72,7 @@
 | 07，教育套件对应模块例程 | 35   | 矩阵键盘模块例程                  | 07_module_key_matrix       |
 |                          | 36   | ENC28J60 网络模块例程             | 07_module_spi_eth_enc28j60 |
 |                          | 37   | 超声波测距模块例程                | 07_module_ultrasonic_sr04  |
+|                          | 38   | ws2812 led 灯带例程              | 07_module_ws2812_led       |
 
 ## 使用
 
@@ -86,7 +87,7 @@ sdk-bsp-stm32f407-spark 支持 RT-Thread Studio 和 MDK 开发。
 
 为了避免 SDK 在持续更新中，每一个 `projects` 都创建一份 `rt-thread` 文件夹 和 `libraries` 文件夹导致的 SDK 越来越臃肿，所以这些通用文件夹被单独提取了出来。这样就会导致直接打开 `MDK` 的工程编译会提示缺少上述两个文件夹的文件，我们使用如下步骤解决这个问题：
 
-1. 双击某个 `project` 目录下的 `mklinks.bat` 文件，或者使用 [Env](https://club.rt-thread.org/ask/question/5699.html) 工具执行 mklink 命令，分别为 `rt-thread` 及 `libraries` 文件创建符号链接。
+1. 双击某个 `project` 目录下的 `mklinks.bat` 文件，或者使用 [Env](https://club.rt-thread.org/ask/question/5699.html) 工具执行 mklinks.bat 命令，分别为 `rt-thread` 及 `libraries` 文件创建符号链接。
 2. 查看目录下是否有 `rt-thread` 和 `libraries` 的文件夹图标。
 3. 使用 [Env](https://club.rt-thread.org/ask/question/5699.html) 工具执行 scons --target=mdk5 更新 MDK5 工程文件。
 

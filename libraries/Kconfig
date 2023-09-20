@@ -82,18 +82,39 @@ menu "Onboard Peripheral Drivers"
                 default y
         endif
 
-	config BSP_USING_ONBOARD_LED_MATRIX
-        bool "Enable Led MATRIX"
-        default n
-        select BSP_USING_PWM
-        select BSP_USING_PWM3
-        select BSP_USING_PWM3_CH2
-        if BSP_USING_ONBOARD_LED_MATRIX
-            config BSP_USING_LED_MATRIX_RS485_DEMO
-                bool "use led matrix rs485 example"
-                default n
-                select BSP_USING_RS485
-        endif
+    config BSP_USING_LED_MATRIX
+            bool "Enable LED matrix onboard or strip outside using ADD-GEN port"
+            select BSP_USING_PWM
+            default n
+            if BSP_USING_LED_MATRIX
+                config BSP_USING_ONBOARD_LED_MATRIX
+                    bool "Enable 19 SK6805 LED matrix onboard, need disable SPI1 BUS"
+                    select BSP_USING_PWM3
+                    select BSP_USING_PWM3_CH2
+                    default n
+                    if BSP_USING_ONBOARD_LED_MATRIX
+                        config BSP_USING_LED_MATRIX_RS485_DEMO
+                            bool "use led matrix rs485 example"
+                            default n
+                            select BSP_USING_RS485
+                    endif
+
+                config BSP_USING_EXT_LED_MATRIX
+                    bool "Enable serial LED strip outside using ADD-GEN port"
+                    select BSP_USING_PWM8
+                    select BSP_USING_PWM8_CH1
+                    default n
+                    if BSP_USING_EXT_LED_MATRIX
+                        config BSP_EXT_LED_NUMS
+                            int "set external strip's LED number"
+                            default 30
+                    endif
+
+                config BSP_USING_NEOPIXEL
+                    bool "Enable Adafruit's NeoPixel for more LED fun modes"
+                    default n
+
+            endif
 
     config BSP_USING_LVGL
         bool "Enable LVGL for LCD"
@@ -408,6 +429,14 @@ menu "On-chip Peripheral Drivers"
             if BSP_USING_PWM3
                 config BSP_USING_PWM3_CH4
                     bool "Enable PWM3 channel4"
+                    default n
+            endif
+        menuconfig BSP_USING_PWM8
+            bool "Enable timer8 output PWM"
+            default n
+            if BSP_USING_PWM8
+                config BSP_USING_PWM8_CH1
+                    bool "Enable PWM8 channel1"
                     default n
             endif
         menuconfig BSP_USING_PWM14
