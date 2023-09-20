@@ -82,18 +82,18 @@ static rt_led_node_t led_matrix[] = {
     {EXTERN_LED_0, {0, 0, 0}, EXTERNAL, RT_NULL},\
 };
 
-static void intern_led_control(rt_led_node_t *node, RGBColor_TypeDef color)
+static void intern_led_control(rt_led_node_t *node, pixel_rgb_t color)
 {
-    Set_LEDColor(node->pin, color);
-    RGB_Reflash();
+    led_matrix_set_color(node->pin, color);
+    led_matrix_reflash();
     node->status = color;
 }
 
-static void extern_led_control(rt_led_node_t *node, RGBColor_TypeDef color)
+static void extern_led_control(rt_led_node_t *node, pixel_rgb_t color)
 {
     rs485_send_buf[0] = 0xA5;
     rs485_send_buf[1] = (node->pin)&0xff;
-    *(RGBColor_TypeDef*)(&(rs485_send_buf[2])) = color;
+    *(pixel_rgb_t*)(&(rs485_send_buf[2])) = color;
     rs485_send_buf[5] = 0;
     rs485_send_buf[6] = 0;
     rs485_send_buf[7] = 0xA6;

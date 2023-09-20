@@ -33,10 +33,10 @@ enum{
 typedef struct LED_NODE
 {
     rt_uint8_t pin;
-    RGBColor_TypeDef status;
+    pixel_rgb_t status;
     rt_uint8_t location;
     rt_uint8_t reverse;
-    void (*io_ctl)(struct LED_NODE *node, RGBColor_TypeDef color);
+    void (*io_ctl)(struct LED_NODE *node, pixel_rgb_t color);
 }rt_led_node_t;
 
 

@@ -77,15 +77,16 @@ led_matrix_receieve_task() 为接受的回调函数，收到数据之后会自�
 led matrix 驱动程序位于 libraries/Board_Drivers/led_matrix/drv_matrix_led.c 中
 
 ```c
-void Set_LEDColor(uint16_t LedId, RGBColor_TypeDef Color)
-{
-    RGB_Data[LedId].G = Color.G;
-    RGB_Data[LedId].R = Color.R;
-    RGB_Data[LedId].B = Color.B;
-}
+/**
+ * @brief Set a pixel's color to PWM reload value.
+ * 
+ * @param n Pixel index, starting from 0.
+ * @param c pixel_rgb_t value, RGB888 format.
+ */
+void led_matrix_set_color(uint16_t n, pixel_rgb_t c)
 ```
 
-使用以上接口即可设置某一个灯珠的颜色。然后调用 RGB_Reflash() 刷新灯珠颜色。
+使用以上接口即可设置某一个灯珠的颜色。然后调用 led_matrix_reflash() 刷新灯珠颜色。
 
 ### 4.3.3 主机驱动 LED Matrix
 
@@ -203,23 +204,23 @@ static void led_matrix_flowing_water_entry()
 以上为循环控制 LED 的程序，这里需要说明一下，代码采用了函数指针的写法，将外部 LED 矩阵和内部 LED 矩阵抽象成同一种操作方法，使用起来比较方便。
 
 ```c
-static void intern_led_control(rt_led_node_t *node, RGBColor_TypeDef color)
+static void intern_led_control(rt_led_node_t *node, pixel_rgb_t color)
 {
-    Set_LEDColor(node->pin, color);
-    RGB_Reflash();
+    led_matrix_set_color(node->pin, color);
+    led_matrix_reflash();
     node->status = color;
 }
 
-static void extern_led_control(rt_led_node_t *node, RGBColor_TypeDef color)
+static void extern_led_control(rt_led_node_t *node, pixel_rgb_t color)
 {
     rs485_send_buf[0] = 0xA5;
     rs485_send_buf[1] = (node->pin)&0xff;
-    *(RGBColor_TypeDef*)(&(rs485_send_buf[2])) = color;
+    *(pixel_rgb_t*)(&(rs485_send_buf[2])) = color;
     rs485_send_buf[5] = 0;
     rs485_send_buf[6] = 0;
     rs485_send_buf[7] = 0xA6;
-    rs485_send_data(rs485_send_buf, 8);
-
+    rs485_send_data((char *)rs485_send_buf, 8);
+    
     node->status = color;
 }
 
@@ -260,10 +261,10 @@ static rt_uint8_t *last_buff = rs485_receive_buf1;
 
 static rt_sem_t rs_485_receive_ready = RT_NULL;
 
-static void intern_led_control(rt_led_node_t *node, RGBColor_TypeDef color)
+static void intern_led_control(rt_led_node_t *node, pixel_rgb_t color)
 {
-    Set_LEDColor(node->pin, color);
-    RGB_Reflash();
+    led_matrix_set_color(node->pin, color);
+    led_matrix_reflash();
     node->status = color;
 }
 
@@ -312,8 +313,6 @@ void led_matrix_receieve_task(void *parameter) /* 接收 RS485 发送过来的�
         {
             buff[index++] = ch;
         }
-
-
     }
 }
 
@@ -327,7 +326,7 @@ void led_matrix_slave_task_entry()
         {
             continue;
         }
-        RGBColor_TypeDef color = *(RGBColor_TypeDef *)(&(last_buff[2]));
+        pixel_rgb_t color = *(pixel_rgb_t *)(&(last_buff[2]));
         led_matrix[led_no].io_ctl(&led_matrix[led_no],color);
     }
 }
