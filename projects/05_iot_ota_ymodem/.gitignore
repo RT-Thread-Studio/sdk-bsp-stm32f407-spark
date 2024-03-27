@@ -2,7 +2,6 @@
 *.map
 *.dblite
 *.elf
-*.bin
 *.hex
 *.axf
 *.exe
