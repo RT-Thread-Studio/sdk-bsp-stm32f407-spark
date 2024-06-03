@@ -46,7 +46,7 @@ static void slider_event_cb(lv_event_t* e)
     lv_label_set_text_fmt(ColorLabel, "%d,%d,%d", LedColor.r, LedColor.g, LedColor.b);
     lv_obj_set_style_bg_color(ColorCont, lv_color_make(LedColor.r, LedColor.g, LedColor.b), LV_PART_MAIN);
     extern void led_matrix_fill_rgb(uint8_t r, uint8_t g, uint8_t b)
-	led_matrix_fill_rgb(LedColor.r, LedColor.g, LedColor.b);
+    led_matrix_fill_rgb(LedColor.r, LedColor.g, LedColor.b);
 }
 void Slider_Create(lv_obj_t* par)
 {
@@ -62,25 +62,25 @@ void Slider_Create(lv_obj_t* par)
         /*Create a slider in the center of the display*/
         lv_obj_t* slider = lv_slider_create(cont);
         lv_obj_set_size(slider, 120, 20);
-		lv_obj_set_style_border_width(slider, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-		lv_obj_set_style_border_color(slider, LV_COLOR_WHITE, LV_PART_MAIN | LV_STATE_FOCUSED);
+        lv_obj_set_style_border_width(slider, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
+        lv_obj_set_style_border_color(slider, LV_COLOR_WHITE, LV_PART_MAIN | LV_STATE_FOCUSED);
         lv_obj_set_style_border_width(slider, 2, LV_PART_INDICATOR | LV_STATE_FOCUSED);
-		lv_obj_set_style_border_color(slider, LV_COLOR_WHITE, LV_PART_INDICATOR | LV_STATE_FOCUSED);
-		rgbSliders[i].slider = slider;
+        lv_obj_set_style_border_color(slider, LV_COLOR_WHITE, LV_PART_INDICATOR | LV_STATE_FOCUSED);
+        rgbSliders[i].slider = slider;
         /*Create a label below the slider*/
         lv_obj_t* label= lv_label_create(par);
         lv_label_set_text(label, "0%");
-		lv_obj_set_style_text_font(label, &lv_font_montserrat_28, LV_PART_MAIN);
+        lv_obj_set_style_text_font(label, &lv_font_montserrat_28, LV_PART_MAIN);
         rgbSliders[i].label = label;
         lv_obj_add_event_cb(slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, label);
-		lv_group_add_obj(appWindow_g, slider);
+        lv_group_add_obj(appWindow_g, slider);
     }
     lv_obj_align_to(rgbSliders[0].slider, cont, LV_ALIGN_TOP_LEFT, 0, 0);
-	lv_obj_set_style_bg_color(rgbSliders[0].slider, lv_color_make(0xff,0,0) , LV_PART_KNOB);
+    lv_obj_set_style_bg_color(rgbSliders[0].slider, lv_color_make(0xff,0,0) , LV_PART_KNOB);
     lv_obj_align_to(rgbSliders[1].slider, cont, LV_ALIGN_LEFT_MID, 0, 0);
-	lv_obj_set_style_bg_color(rgbSliders[1].slider, lv_color_make(0,0xff,0) , LV_PART_KNOB);
+    lv_obj_set_style_bg_color(rgbSliders[1].slider, lv_color_make(0,0xff,0) , LV_PART_KNOB);
     lv_obj_align_to(rgbSliders[2].slider, cont, LV_ALIGN_BOTTOM_LEFT, 0, 0);
-	lv_obj_set_style_bg_color(rgbSliders[2].slider, lv_color_make(0,0,0xff) , LV_PART_KNOB);
+    lv_obj_set_style_bg_color(rgbSliders[2].slider, lv_color_make(0,0,0xff) , LV_PART_KNOB);
     for (int i = 0; i < __Sizeof(rgbSliders); i++)
     {
         lv_obj_align_to(rgbSliders[i].label, rgbSliders[i].slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
@@ -95,7 +95,7 @@ void Slider_Create(lv_obj_t* par)
 
     lv_obj_t* colorlabel = lv_label_create(par);
     lv_label_set_text(colorlabel, "0,0,0");
-	lv_obj_set_style_text_font(colorlabel, &lv_font_montserrat_28, LV_PART_MAIN);
+    lv_obj_set_style_text_font(colorlabel, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_align_to(colorlabel, ColorCont, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     ColorLabel = colorlabel;
 }
@@ -118,10 +118,10 @@ static void Setup(void)
 {
     lv_obj_move_foreground(appWindow);
     ContStyle_Setup();
-	Cont = Cont_Create(appWindow);
-	Title = Title_Create(appWindow,"Settings");
+    Cont = Cont_Create(appWindow);
+    Title = Title_Create(appWindow,"Settings");
     Slider_Create(Cont);
-	anim_timeline = PageAnim_Create(Cont, Title);
+    anim_timeline = PageAnim_Create(Cont, Title);
     PageAnim_Play(anim_timeline, false);
 }
 
@@ -129,8 +129,8 @@ static void Exit(void)
 {
     PageAnim_Play(anim_timeline, true);
     lv_anim_timeline_del(anim_timeline);
-	extern void led_matrix_rst();
-	led_matrix_rst();
+    extern void led_matrix_clear();
+    led_matrix_clear();
     lv_obj_clean(appWindow);
 }
 
@@ -142,51 +142,51 @@ static void Event(lv_event_t* e)
         uint8_t key = *(uint8_t*)lv_event_get_user_data(e);
         if (key == PAGE_KEY_LEFT)
         {
-			if(isSelect)
-			{
-				isSelect = 0;
-				lv_obj_t* obj = lv_group_get_focused(appWindow_g);
-				lv_obj_set_style_border_width(obj, 0, LV_PART_KNOB | LV_STATE_FOCUSED);
-			}
-			else
-			{
-				LV_LOG("Page->Pop()\n");
-				PM_Pop(Page);
-			}
+            if(isSelect)
+            {
+                isSelect = 0;
+                lv_obj_t* obj = lv_group_get_focused(appWindow_g);
+                lv_obj_set_style_border_width(obj, 0, LV_PART_KNOB | LV_STATE_FOCUSED);
+            }
+            else
+            {
+                LV_LOG("Page->Pop()\n");
+                PM_Pop(Page);
+            }
         }
 
         if (key == PAGE_KEY_UP)
         {
-			if(!isSelect)
-			{
-				lv_group_set_editing(appWindow_g, false);
-				lv_group_focus_prev(appWindow_g);
-			}
-			else
-			{
-				lv_group_send_data(appWindow_g, LV_KEY_RIGHT);
-			}
+            if(!isSelect)
+            {
+                lv_group_set_editing(appWindow_g, false);
+                lv_group_focus_prev(appWindow_g);
+            }
+            else
+            {
+                lv_group_send_data(appWindow_g, LV_KEY_RIGHT);
+            }
         }
 
         if (key == PAGE_KEY_DOWN)
         {
-			if(!isSelect)
-			{
-				lv_group_set_editing(appWindow_g, false);
-				lv_group_focus_next(appWindow_g);
-			}
-			else
-			{
-				lv_group_send_data(appWindow_g, LV_KEY_LEFT);
-			}
+            if(!isSelect)
+            {
+                lv_group_set_editing(appWindow_g, false);
+                lv_group_focus_next(appWindow_g);
+            }
+            else
+            {
+                lv_group_send_data(appWindow_g, LV_KEY_LEFT);
+            }
         }
 
         if (key == PAGE_KEY_RIGHT)
         {
-			isSelect = 1;
-			lv_obj_t* obj = lv_group_get_focused(appWindow_g);
-			lv_obj_set_style_border_width(obj, 2, LV_PART_KNOB | LV_STATE_FOCUSED);
-			lv_obj_set_style_border_color(obj, LV_COLOR_WHITE, LV_PART_KNOB | LV_STATE_FOCUSED);
+            isSelect = 1;
+            lv_obj_t* obj = lv_group_get_focused(appWindow_g);
+            lv_obj_set_style_border_width(obj, 2, LV_PART_KNOB | LV_STATE_FOCUSED);
+            lv_obj_set_style_border_color(obj, LV_COLOR_WHITE, LV_PART_KNOB | LV_STATE_FOCUSED);
         }
 
     }
