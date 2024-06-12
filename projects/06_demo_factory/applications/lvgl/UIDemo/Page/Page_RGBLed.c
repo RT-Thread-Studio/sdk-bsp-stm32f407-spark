@@ -1,5 +1,6 @@
 
 #include "../DisplayPrivate.h"
+#include <drv_matrix_led.h>
 
 /*导出页面*/
 PAGE_EXPORT(RGBLed);
@@ -45,7 +46,6 @@ static void slider_event_cb(lv_event_t* e)
     }
     lv_label_set_text_fmt(ColorLabel, "%d,%d,%d", LedColor.r, LedColor.g, LedColor.b);
     lv_obj_set_style_bg_color(ColorCont, lv_color_make(LedColor.r, LedColor.g, LedColor.b), LV_PART_MAIN);
-    extern void led_matrix_fill_rgb(uint8_t r, uint8_t g, uint8_t b)
     led_matrix_fill_rgb(LedColor.r, LedColor.g, LedColor.b);
 }
 void Slider_Create(lv_obj_t* par)
