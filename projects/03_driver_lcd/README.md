@@ -49,6 +49,182 @@ int main(void)
 }
 ```
 
+### 例程代码分析 -- LCD驱动库 drv_lcd
+
+创建新工程时，选中基于RT-Spark开发板构建模板工程。模板工程建立成功后，工程目录下的`libraries`目录中出现`lcd`依赖库。
+
+在`lcd`目录下的`drv_lcd.c`文件中存放着LCD驱动的关键代码。
+
+1. LCD硬件初始化：在LCD外设的配置中，大致可分为两大部分
+   1. LCD硬件初始化--配置ST7789V3芯片寄存器
+```c
+rt_err_t drv_lcd_init(struct rt_device *device)
+{
+
+    SRAM_HandleTypeDef hsram1 = {0};
+    FSMC_NORSRAM_TimingTypeDef read_timing = {0};
+    FSMC_NORSRAM_TimingTypeDef write_timing = {0};
+
+#ifndef BSP_USING_ONBOARD_LCD_PWM_BL
+    rt_pin_mode(LCD_BL, PIN_MODE_OUTPUT);
+#endif /* BSP_USING_ONBOARD_LCD_PWM_BL */
+
+#ifdef BSP_USING_ONBOARD_LCD_TEAREFFECT
+    rt_pin_mode(LCD_TE_PIN, PIN_MODE_INPUT_PULLUP);
+    rt_pin_attach_irq(LCD_TE_PIN, PIN_IRQ_MODE_RISING, lcd_teareffect_isr, RT_NULL);
+#endif /* BSP_USING_ONBOARD_LCD_TEAREFFECT */
+    rt_pin_mode(LCD_RST, PIN_MODE_OUTPUT);
+
+    rt_pin_write(LCD_RST, PIN_LOW);
+    rt_thread_mdelay(100);
+    rt_pin_write(LCD_RST, PIN_HIGH);
+    rt_thread_mdelay(100);
+    // FSMC_NORSRAM_TimingTypeDef Timing = {0};
+
+    /** Perform the SRAM1 memory initialization sequence
+     */
+    hsram1.Instance = FSMC_NORSRAM_DEVICE;
+    hsram1.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
+    /* hsram1.Init */
+    hsram1.Init.NSBank = FSMC_NORSRAM_BANK3;
+    
+    /*
+        省略部分代码
+    */
+
+    return RT_EOK;
+}
+INIT_COMPONENT_EXPORT(drv_lcd_init);
+```
+可以看到，init初始化函数被导入到了RT-Thread内核启动流程之中，位于启动过程中的component部分。
+
+   2. LCD软件初始化--注册进入RT-Thread Kernel
+```c
+struct drv_lcd_device
+{
+    struct rt_device parent;
+
+    struct rt_device_graphic_info lcd_info;
+};
+
+static struct drv_lcd_device _lcd;
+
+int drv_lcd_hw_init(void)
+{
+    rt_err_t result = RT_EOK;
+    struct rt_device *device = &_lcd.parent;
+    /* memset _lcd to zero */
+    memset(&_lcd, 0x00, sizeof(_lcd));
+
+    _lcd.lcd_info.bits_per_pixel = 16;
+    _lcd.lcd_info.pixel_format = RTGRAPHIC_PIXEL_FORMAT_RGB565;
+
+    device->type = RT_Device_Class_Graphic;
+#ifdef RT_USING_DEVICE_OPS
+    device->ops = &lcd_ops;
+#else
+    device->init = drv_lcd_init;
+    device->control = drv_lcd_control;
+#endif
+    device->user_data = &fsmc_lcd_ops;
+    /* register lcd device */
+    rt_device_register(device, "lcd", RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_STANDALONE);
+
+    return result;
+}
+INIT_DEVICE_EXPORT(drv_lcd_hw_init);
+```
+可以看到，init函数进行了RT-Thread内核中的LCD硬件设备的初始化。其中的_lcd便是我们的硬件LCD设备，在经过一系列初始化配置后，将LCD设备通过`rt_device_register`函数，以`Graphic Device`设备的身份注册进入RT-Thread内核之中。
+
+在前面的初始化部分，我们已经对LCD设备指定了各个操作对应的函数，如初始化init、控制设备control。
+
+![LCD设备注册进入内核](figures/lcd_register.png)
+
+#### 关键结构体解析
+1. rt_device -- RT-Thread内核device类结构体
+```c
+struct rt_device
+{
+    struct rt_object          parent;                   /**< inherit from rt_object */
+
+    enum rt_device_class_type type;                     /**< device type */
+    rt_uint16_t               flag;                     /**< device flag */
+    rt_uint16_t               open_flag;                /**< device open flag */
+
+    rt_uint8_t                ref_count;                /**< reference count */
+    rt_uint8_t                device_id;                /**< 0 - 255 */
+
+    /* device call back */
+    rt_err_t (*rx_indicate)(rt_device_t dev, rt_size_t size);
+    rt_err_t (*tx_complete)(rt_device_t dev, void *buffer);
+
+#ifdef RT_USING_DEVICE_OPS
+    const struct rt_device_ops *ops;
+#else
+    /* common device interface */
+    rt_err_t  (*init)   (rt_device_t dev);
+    rt_err_t  (*open)   (rt_device_t dev, rt_uint16_t oflag);
+    rt_err_t  (*close)  (rt_device_t dev);
+    rt_size_t (*read)   (rt_device_t dev, rt_off_t pos, void *buffer, rt_size_t size);
+    rt_size_t (*write)  (rt_device_t dev, rt_off_t pos, const void *buffer, rt_size_t size);
+    rt_err_t  (*control)(rt_device_t dev, int cmd, void *args);
+#endif /* RT_USING_DEVICE_OPS */
+
+#ifdef RT_USING_POSIX_DEVIO
+    const struct dfs_file_ops *fops;
+    struct rt_wqueue wait_queue;
+#endif /* RT_USING_POSIX_DEVIO */
+
+    void                     *user_data;                /**< device private data */
+};
+```
+2. rt_device_graphic_info -- RT-Thread内核图形设备类结构体
+```c
+/**
+ * graphic device information structure
+ */
+struct rt_device_graphic_info
+{
+    rt_uint8_t  pixel_format;                           /**< graphic format */
+    rt_uint8_t  bits_per_pixel;                         /**< bits per pixel */
+    rt_uint16_t pitch;                                  /**< bytes per line */
+
+    rt_uint16_t width;                                  /**< width of graphic device */
+    rt_uint16_t height;                                 /**< height of graphic device */
+
+    rt_uint8_t *framebuffer;                            /**< frame buffer */
+    rt_uint32_t smem_len;                               /**< allocated frame buffer size */
+};
+```
+
+在本例程中，LCD设备继承了device类与Graphic Device图形设备类，以实现“以图形设备注册进入RT-Thread内核”的效果。
+
+
+#### 关键函数解析
+1. rt_device_register -- RT-Thread设备注册函数
+```c
+/**
+ * @brief This function registers a device driver with a specified name.
+ *
+ * @param dev is the pointer of device driver structure.
+ *
+ * @param name is the device driver's name.
+ *
+ * @param flags is the capabilities flag of device.
+ *
+ * @return the error code, RT_EOK on initialization successfully.
+ */
+rt_err_t rt_device_register(rt_device_t dev,
+                            const char *name,
+                            rt_uint16_t flags);
+```
+通过此函数，将设备注册进入RT-Thread内核链表之中。
+参数：        
+   1. dev：RT-Thread内核设备的指针，指向我们要注册的设备结构体
+   2. name：设备的别名，可用于在RT-Thread内核中查找设备
+   3. flag：设备的属性标识，可传入`RT_DEVICE_FLAG_RDWR`等属性  
+
+**其余LCD操作API, 如draw_Line, draw_Point与常规LCD驱动类似**
 ## 运行
 
 ### 编译 & 下载
@@ -63,6 +239,11 @@ int main(void)
 按下复位按键重启开发板，观察开发板上 LCD 的实际效果。正常运行后，LCD 上会显示 RT-Thread LOGO，下面会显示 3 行大小为 16、 24、 32 像素的文字，文字下面是一行直线，直线的下方是一个同心圆。如下图所示：
 
 ![LCD 显示图案](figures/lcd_show_logo.png)
+
+同时，可以通过命令行指令进行LCD控制，命令内容如下：
+1. app_lcd_clean -- 清屏
+2. app_lcd_string -- 显示例程字符串部分
+3. app_lcd_circle -- 显示例程圆圈部分
 
 ## 注意事项
 

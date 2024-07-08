@@ -264,7 +264,7 @@
 /* Hardware Drivers Config */
 
 #define SOC_STM32F407ZG
-#define BOARD_STM32F407_ATK_EXPLORER
+#define BOARD_STM32F407_SPARK
 
 /* Onboard Peripheral Drivers */
 
@@ -272,6 +272,7 @@
 #define BSP_USING_SRAM
 #define BSP_USING_ONBOARD_LCD
 #define BSP_USING_ONBOARD_LCD_PWM_BL
+#define BSP_USING_ONBOARD_LCD_TEST
 /* end of Onboard Peripheral Drivers */
 
 /* On-chip Peripheral Drivers */

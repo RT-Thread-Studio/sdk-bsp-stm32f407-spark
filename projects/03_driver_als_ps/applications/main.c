@@ -11,47 +11,36 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <board.h>
-#include "ap3216c.h"
 
 #define DBG_TAG "main"
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
+/* 配置 LED 灯引脚 */
+#define PIN_LED_B              GET_PIN(F, 11)      // PF11 :  LED_B        --> LED
+#define PIN_LED_R              GET_PIN(F, 12)      // PF12 :  LED_R        --> LED
+
 int main(void)
 {
-    ap3216c_device_t dev;
-    const char *i2c_bus_name = "i2c2";
-    int count = 0;
+    unsigned int count = 1;
 
-    /* 初始化 ap3216c */
-    dev = ap3216c_init(i2c_bus_name);
-    if (dev == RT_NULL)
+    rt_pin_mode(PIN_LED_R, OUTPUT_OD);
+
+    for(;;)
     {
-        LOG_E("The sensor initializes failure.");
-        return 0;
+        /* LED 灯亮 */
+        rt_pin_write(PIN_LED_R, PIN_LOW);
+        LOG_D("led on, count: %d", count);
+        rt_thread_mdelay(500);
+
+        /* LED 灯灭 */
+        rt_pin_write(PIN_LED_R, PIN_HIGH);
+        LOG_D("led off");
+        rt_thread_mdelay(500);
+
+        count++;
     }
 
-    while (count++ < 100)
-    {
-        rt_uint16_t ps_data;
-        float brightness;
-
-        /* 读接近感应值 */
-        ps_data = ap3216c_read_ps_data(dev);
-        if (ps_data == 0)
-        {
-            LOG_D("object is not proximity of sensor.");
-        }
-        else
-        {
-            LOG_D("current ps data   : %d.", ps_data);
-        }
-
-        /* 读光照强度值 */
-        brightness = ap3216c_read_ambient_light(dev);
-        LOG_D("current brightness: %d.%d(lux).", (int)brightness, ((int)(10 * brightness) % 10));
-
-        rt_thread_mdelay(1000);
-    }
     return 0;
 }
+
