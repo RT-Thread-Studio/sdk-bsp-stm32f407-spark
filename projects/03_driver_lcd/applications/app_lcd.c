@@ -5,30 +5,17 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2023-5-10      ShiHao       first version
+ * 2024-07-08     Nino       the first version
  */
 
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <board.h>
 
-#define DBG_TAG "main"
-#define DBG_LVL DBG_LOG
-#include <rtdbg.h>
-
 #include <drv_lcd.h>
-#include <rttlogo.h>
 
-/* 配置 LED 灯引脚 */
-#define PIN_LED_B              GET_PIN(F, 11)      // PF11 :  LED_B        --> LED
-#define PIN_LED_R              GET_PIN(F, 12)      // PF12 :  LED_R        --> LED
-
-int main(void)
-{
+void app_lcd_string(void){
     lcd_clear(WHITE);
-
-    /* show RT-Thread logo */
-    lcd_show_image(0, 0, 240, 69, image_rttlogo);
 
     /* set the background color and foreground color */
     lcd_set_color(WHITE, BLACK);
@@ -40,13 +27,21 @@ int main(void)
 
     /* draw a line on lcd */
     lcd_draw_line(0, 69 + 16 + 24 + 32, 240, 69 + 16 + 24 + 32);
+}
 
+void app_lcd_circle(void){
     /* draw a concentric circles */
     lcd_draw_point(120, 194);
     for (int i = 0; i < 46; i += 4)
     {
         lcd_draw_circle(120, 194, i);
     }
-    return 0;
 }
 
+void app_lcd_clean(void){
+    lcd_clear(WHITE);
+}
+
+MSH_CMD_EXPORT(app_lcd_string, show string on LCD);
+MSH_CMD_EXPORT(app_lcd_circle, show circle on LCD);
+MSH_CMD_EXPORT(app_lcd_clean, clean LCD);

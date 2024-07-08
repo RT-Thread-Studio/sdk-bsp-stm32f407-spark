@@ -208,7 +208,7 @@
   <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders" />
   <storageModule moduleId="refreshScope" versionNumber="2">
     <configuration configurationName="Debug">
-      <resource resourceType="PROJECT" workspacePath="/dist_ide_project" />
+      <resource resourceType="PROJECT" workspacePath="/03_driver_lcd" />
     </configuration>
   </storageModule>
   <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets" />
