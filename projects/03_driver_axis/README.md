@@ -119,6 +119,13 @@ int main(void)
     return 0;
 }
 ```
+
+### 使用BSP支持包来构建空白项目
+1. 先通过ENV工具配置软件包依赖
+![ENV工具配置](figures/菜单配置1.png)
+2. 通过pkgs --update来拉取/升级相关软件包
+![pkg拉取/升级软件包](figures/PKG升级.png)
+
 ### 编译 & 下载
 
 - RT-Thread Studio：在 RT-Thread Studio 的包管理器中下载 `STM32F407-RT-SPARK` 资源包，然后创建新工程，执行编译。
@@ -161,6 +168,119 @@ int main(void)
 [D/main] current gyroscope    : gyros_x     5, gyros_y    -8, gyros_z    -2
 ```
 
+## RT-Thread模块化编程示例
+
+在RT-Thread中，我们可以通过自动初始化的设计方案来实现高效的代码解耦与功能实现。
+
+我们创建`app_icm20608.c`文件，将其作为我们的功能代码部分。
+
+```c
+#include <rtthread.h>
+#include <rtdevice.h>
+#include <board.h>
+#include <icm20608.h>
+
+#define DBG_TAG "app_icm"
+#define DBG_LVL DBG_LOG
+#include <rtdbg.h>
+
+rt_mutex_t thread_mutex;
+
+void app_icm20608_entry(void* argument){
+    icm20608_device_t dev = argument;
+    rt_int16_t accel_x, accel_y, accel_z;
+    rt_int16_t gyros_x, gyros_y, gyros_z;
+    rt_err_t result;
+
+    for(;;){
+        rt_mutex_take(thread_mutex, RT_WAITING_FOREVER);
+        /* 读取三轴加速度 */
+        result = icm20608_get_accel(dev, &accel_x, &accel_y, &accel_z);
+        if (result == RT_EOK)
+        {
+            LOG_D("current accelerometer: accel_x%6d, accel_y%6d, accel_z%6d", accel_x, accel_y, accel_z);
+        }
+        else
+        {
+            LOG_E("The sensor does not work");
+            break;
+        }
+
+        /* 读取三轴陀螺仪 */
+        result = icm20608_get_gyro(dev, &gyros_x, &gyros_y, &gyros_z);
+        if (result == RT_EOK)
+        {
+            LOG_D("current gyroscope    : gyros_x%6d, gyros_y%6d, gyros_z%6d", gyros_x, gyros_y, gyros_z);
+        }
+        else
+        {
+            LOG_E("The sensor does not work");
+            break;
+        }
+
+        rt_mutex_release(thread_mutex);
+
+        rt_thread_mdelay(1000);
+    }
+}
+
+int app_icm20608_init(void){
+    icm20608_device_t dev = rt_malloc(sizeof(struct icm20608_device));
+    const char* i2c_bus_name = "i2c2";
+    rt_err_t result;
+    rt_thread_t tid;
+
+    dev = icm20608_init(i2c_bus_name);
+
+    /* 对 icm20608 进行零值校准：采样 10 次，求取平均值作为零值*/
+    result = icm20608_calib_level(dev, 10);
+    if (result == RT_EOK)
+    {
+        LOG_D("The sensor calibrates success");
+        LOG_D("accel_offset: X%6d  Y%6d  Z%6d", dev->accel_offset.x, dev->accel_offset.y, dev->accel_offset.z);
+        LOG_D("gyro_offset : X%6d  Y%6d  Z%6d", dev->gyro_offset.x, dev->gyro_offset.y, dev->gyro_offset.z);
+    }
+    else
+    {
+        LOG_E("The sensor calibrates failure");
+        icm20608_deinit(dev);
+
+        return 0;
+    }
+
+    thread_mutex = rt_mutex_create("thread_mutex", RT_IPC_FLAG_FIFO);
+
+    tid = rt_thread_create("icm20608", app_icm20608_entry, dev, 1024, 20, 10);
+    if(tid != RT_NULL) rt_thread_startup(tid);
+
+    return 0;
+}
+
+void app_icm_start(){
+    rt_mutex_release(thread_mutex);
+}
+
+void app_icm_stop(){
+    rt_mutex_take(thread_mutex, RT_WAITING_FOREVER);
+}
+
+INIT_DEVICE_EXPORT(app_icm20608_init);
+
+MSH_CMD_EXPORT(app_icm_start, icm start);
+MSH_CMD_EXPORT(app_icm_stop, icm stop);
+
+```
+
+在这部分代码中
+1. 通过`INIT_DEVICE_EXPORT`宏函数实现了外设的初始化与对应线程的注册
+2. 使用`MSH_CMD_EXPORT`宏函数与相关函数实现了通过Finsh命令行交互的功能。通过输入`app_icm_start`与`app_icm_stop`，我们可以实现启动/挂起传感器数据采集线程。
+
+为了实现线程挂起与暂停的功能，我们使用了IPC（进程间通信）中的Mutex（互斥量）来实现。通过对互斥量的获取与释放，我们可以直接控制对互斥量有需求的线程。
+
+### 运行效果
+![pkg拉取/升级软件包](figures/运行效果.png)
+
+可以看到，我们在输入`app_icm_start`后，传感器线程启动，开始数据采集；在输入`app_icm_stop`后，传感器线程被挂起。
 ## 注意事项
 
 暂无。
@@ -169,4 +289,4 @@ int main(void)
 
 - 设备与驱动：[PIN 设备](https://www.rt-thread.org/document/site/#/rt-thread-version/rt-thread-standard/programming-manual/device/pin/pin)
 - icm20608 软件包：[https://github.com/RT-Thread-packages/icm20608](https://github.com/RT-Thread-packages/icm20608)
-
+- icm20608 寄存器表: [icm20608寄存器表](https://invensense.tdk.com/wp-content/uploads/2015/03/ICM-20608-Register-Map.pdf)
