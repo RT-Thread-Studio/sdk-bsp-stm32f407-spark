@@ -138,7 +138,7 @@ INIT_DEVICE_EXPORT(drv_lcd_hw_init);
 
 在前面的初始化部分，我们已经对LCD设备指定了各个操作对应的函数，如初始化init、控制设备control。
 
-![LCD设备注册进入内核](figures\注册进入内核.PNG)
+![LCD设备注册进入内核](figures\注册进入内核.png)
 
 #### 关键结构体解析
 1. rt_device -- RT-Thread内核device类结构体
