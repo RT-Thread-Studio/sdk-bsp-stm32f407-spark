@@ -85,11 +85,11 @@ int main(void)
 - RT-ENV：
 	1. 在空白工程模板文件夹中，右键空白处打开选项菜单，打开ENV工具；或者在RT-Thread Studio中右键工程文件夹，打开ENV终端。打开后输入`menuconfig`，进行终端可视化菜单配置。
 	2. 打开menuconfig可视化菜单后，依次进入`Hardware Dirvers Config --> Onboard Peripheral Drivers --> Enable AP3216C(I2C2)`，选中`Enable AP3216C`后，点击键盘`Y`键选中对应外设，然后用方向键选中底部菜单的`SAVE`后，回车键保存，然后退出。
-![menuconfig配置界面1](figures/ENV终端配置-1.png)
-![menuconfig配置界面2](figures/ENV终端配置-2.png)
-![menuconfig配置界面3](figures/ENV终端配置-3.png)
+![menuconfig配置界面1](figures/ENV终端配置-1.PNG)
+![menuconfig配置界面2](figures/ENV终端配置-2.PNG)
+![menuconfig配置界面3](figures/ENV终端配置-3.PNG)
 	3. 在ENV终端中使用`pkgs --update`命令，将自动下载刚刚选中的软件包（上游服务器为gitee），此操作将会下载AP3216C的驱动软件包，路径位于工程目录下的`packages`文件夹中。
-![下载软件包](figures/pkgs包管理器下载.png)
+![下载软件包](figures/pkgs包管理器下载.PNG)
 
 至此，我们便可以在空白工程模板的基础上，获取到完整的项目依赖库。接下来我们便可以基于软件包进行进一步的工程开发。
 
