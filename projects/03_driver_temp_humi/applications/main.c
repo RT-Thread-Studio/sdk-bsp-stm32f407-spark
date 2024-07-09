@@ -11,43 +11,36 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <board.h>
-#include "aht10.h"
 
 #define DBG_TAG "main"
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
+/* 配置 LED 灯引脚 */
+#define PIN_LED_B              GET_PIN(F, 11)      // PF11 :  LED_B        --> LED
+#define PIN_LED_R              GET_PIN(F, 12)      // PF12 :  LED_R        --> LED
+
 int main(void)
 {
-    float humidity, temperature;
-    aht10_device_t dev;
+    unsigned int count = 1;
 
-    /* 总线名称 */
-    const char *i2c_bus_name = "i2c3";
-    int count = 0;
+    rt_pin_mode(PIN_LED_R, OUTPUT_OD);
 
-    /* 等待传感器正常工作 */
-    rt_thread_mdelay(2000);
-
-    /* 初始化 aht10 */
-    dev = aht10_init(i2c_bus_name);
-    if (dev == RT_NULL)
+    for(int i = 0; i< 10; i++)
     {
-        LOG_E(" The sensor initializes failure");
-        return 0;
+        /* LED 灯亮 */
+        rt_pin_write(PIN_LED_R, PIN_LOW);
+        LOG_D("led on, count: %d", count);
+        rt_thread_mdelay(500);
+
+        /* LED 灯灭 */
+        rt_pin_write(PIN_LED_R, PIN_HIGH);
+        LOG_D("led off");
+        rt_thread_mdelay(500);
+
+        count++;
     }
 
-    while (count++ < 100)
-    {
-        /* 读取湿度 */
-        humidity = aht10_read_humidity(dev);
-        LOG_D("humidity   : %d.%d %%", (int)humidity, (int)(humidity * 10) % 10);
-
-        /* 读取温度 */
-        temperature = aht10_read_temperature(dev);
-        LOG_D("temperature: %d.%d", (int)temperature, (int)(temperature * 10) % 10);
-
-        rt_thread_mdelay(1000);
-    }
     return 0;
 }
+

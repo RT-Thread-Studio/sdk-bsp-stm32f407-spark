@@ -162,6 +162,10 @@
 /* u8g2: a monochrome graphic library */
 
 /* end of u8g2: a monochrome graphic library */
+
+/* PainterEngine: A cross-platform graphics application framework written in C language */
+
+/* end of PainterEngine: A cross-platform graphics application framework written in C language */
 /* end of multimedia packages */
 
 /* tools packages */
@@ -189,15 +193,9 @@
 
 /* peripheral libraries and drivers */
 
-/* sensors drivers */
-
+#define PKG_USING_SENSORS_DRIVERS
 #define PKG_USING_AHT10
-#define PKG_USING_AHT10_V210
-/* end of sensors drivers */
-
-/* touch drivers */
-
-/* end of touch drivers */
+#define PKG_USING_AHT10_LATEST_VERSION
 
 /* Kendryte SDK */
 
@@ -207,10 +205,6 @@
 /* AI packages */
 
 /* end of AI packages */
-
-/* Signal Processing and Control Algorithm Packages */
-
-/* end of Signal Processing and Control Algorithm Packages */
 
 /* miscellaneous packages */
 
@@ -254,15 +248,11 @@
 
 /* Communication */
 
-/* end of Communication */
-
 /* Device Control */
 
 /* end of Device Control */
 
 /* Other */
-
-/* end of Other */
 
 /* Signal IO */
 
@@ -278,7 +268,7 @@
 /* Hardware Drivers Config */
 
 #define SOC_STM32F407ZG
-#define BOARD_STM32F407_ATK_EXPLORER
+#define BOARD_STM32F407_SPARK
 
 /* Onboard Peripheral Drivers */
 
