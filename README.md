@@ -69,10 +69,11 @@
 |                          | 32   | 板载 LED matrix 和 RS485 驱动例程 | 06_demo_rs485_led_matrix   |
 |                          | 33   | nes 模拟器实验                    | 06_demo_nes_simulator      |
 |                          | 34   | 开发板综合 Demo（出厂 Demo）      | 06_demo_factory            |
-| 07，教育套件对应模块例程 | 35   | 矩阵键盘模块例程                  | 07_module_key_matrix       |
-|                          | 36   | ENC28J60 网络模块例程             | 07_module_spi_eth_enc28j60 |
-|                          | 37   | 超声波测距模块例程                | 07_module_ultrasonic_sr04  |
-|                          | 38   | ws2812 led 灯带例程              | 07_module_ws2812_led       |
+|                          | 35   | Wav Player Demo                  | 06_demo_wavplayer            |
+| 07，教育套件对应模块例程 | 36   | 矩阵键盘模块例程                  | 07_module_key_matrix       |
+|                          | 37   | ENC28J60 网络模块例程             | 07_module_spi_eth_enc28j60 |
+|                          | 38   | 超声波测距模块例程                | 07_module_ultrasonic_sr04  |
+|                          | 39   | ws2812 led 灯带例程              | 07_module_ws2812_led       |
 
 ## 使用
 
