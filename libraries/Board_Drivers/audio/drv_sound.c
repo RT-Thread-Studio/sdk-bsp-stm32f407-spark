@@ -511,4 +511,4 @@ int rt_hw_sound_init(void)
     return RT_EOK;
 }
 
-// INIT_DEVICE_EXPORT(rt_hw_sound_init);
+INIT_DEVICE_EXPORT(rt_hw_sound_init);
