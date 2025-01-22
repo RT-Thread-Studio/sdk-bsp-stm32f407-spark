@@ -233,6 +233,15 @@
 #define RW007_INT_BUSY_PIN 107
 #define RW007_RST_PIN 111
 
+/* CYW43012 WiFi */
+
+
+/* BL808 WiFi */
+
+
+/* CYW43439 WiFi */
+
+
 /* IoT Cloud */
 
 #define PKG_USING_ONENET
@@ -242,7 +251,7 @@
 #define ONENET_INFO_APIKEY "I4x5KooPnTYSm4h0=ZJ3tPq9xnQ="
 #define ONENET_INFO_PROID "610468"
 #define ONENET_MASTER_APIKEY "4nLKu7bwfuZmfZaMCycQc=pDvHs="
-#define PKG_USING_ONENET_V100
+#define PKG_USING_ONENET_LATEST_VERSION
 
 /* security packages */
 
