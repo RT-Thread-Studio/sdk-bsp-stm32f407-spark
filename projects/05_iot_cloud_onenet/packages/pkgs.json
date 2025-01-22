@@ -11,7 +11,7 @@
  }, 
  {
   "path": "/packages/iot/iot_cloud/onenet", 
-  "ver": "v1.0.0", 
+  "ver": "latest", 
   "name": "ONENET"
  }, 
  {
