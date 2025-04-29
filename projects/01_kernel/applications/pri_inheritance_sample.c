@@ -24,22 +24,22 @@ static void thread_c_entry(void *parameter)
 
     /* 预留创建并启动线程 A 的时间 */
     rt_thread_delay(100);
-    rt_kprintf("thread C priority is: %d\n", tidc->current_priority);
+    rt_kprintf("thread C priority is: %d\n", rt_sched_thread_get_curr_prio(tidc));
 
     /* 获取互斥量 */
     rt_mutex_take(mutex, RT_WAITING_FOREVER);
-    rt_kprintf("thread C priority is: %d, take the mutex\n", tidc->current_priority);
+    rt_kprintf("thread C priority is: %d, take the mutex\n", rt_sched_thread_get_curr_prio(tidc));
 
     /* 持续持有互斥量 3000ms, 线程  A 优先级高会主动抢占 CPU */
     tick = rt_tick_get();
     while (rt_tick_get() - tick < 3000) ;
 
-    rt_kprintf("thread C priority is: %d, running...\n", tidc->current_priority);
+    rt_kprintf("thread C priority is: %d, running...\n", rt_sched_thread_get_curr_prio(tidc));
 
     /* 释放互斥量 */
     rt_kprintf("thread C release the mutex\n\n");
     rt_mutex_release(mutex);
-    rt_kprintf("thread C priority is: %d\n", tidc->current_priority);
+    rt_kprintf("thread C priority is: %d\n", rt_sched_thread_get_curr_prio(tidc));
     rt_kprintf("thread C exit\n");
 }
 
@@ -51,7 +51,7 @@ static void thread_a_entry(void *parameter)
     rt_thread_delay(200);
 
     /* 线程 A 尝试获取互斥量 */
-    rt_kprintf("thread A priority is: %d, try to take the mutex\n", tida->current_priority);
+    rt_kprintf("thread A priority is: %d, try to take the mutex\n", rt_sched_thread_get_curr_prio(tidc));
     rt_mutex_take(mutex, RT_WAITING_FOREVER);
     rt_kprintf("thread A take the mutex\n");
 

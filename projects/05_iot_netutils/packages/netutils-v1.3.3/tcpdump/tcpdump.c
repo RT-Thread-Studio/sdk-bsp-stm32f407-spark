@@ -21,9 +21,8 @@
 #ifdef PKG_NETUTILS_TCPDUMP_DBG
     #define DBG_ENABLE
 
-    #define DBG_SECTION_NAME  "TCPDUMP"
-    #define DBG_LEVEL         DBG_INFO
-    #define DBG_COLOR
+    #define DBG_TAG           "TCPDUMP"
+    #define DBG_LvL           DBG_INFO
 #else
     #undef  DBG_ENABLE
 #endif
@@ -244,13 +243,13 @@ static rt_err_t rt_tcpdump_pcap_file_write(const void *buf, int len)
 
     if (filename == RT_NULL)
     {
-        dbg_log(DBG_ERROR, "file name is null!\n");
+        LOG_E("file name is null!\n");
         return -RT_ERROR;
     }
 
     // if ((len == 0) && (fd > 0))
     // {
-    //     dbg_log(DBG_ERROR, "ip mess error and close file! len = %d, fd = %d\n", len, fd);
+    //     LOG_E("ip mess error and close file! len = %d, fd = %d\n", len, fd);
     //     close(fd);
     //     fd = -1;
     //     return -RT_ERROR;
@@ -261,7 +260,7 @@ static rt_err_t rt_tcpdump_pcap_file_write(const void *buf, int len)
         fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0);
         if (fd < 0)
         {
-            dbg_log(DBG_ERROR, "open file failed!\n");
+            LOG_E("open file failed!\n");
             return -RT_ERROR;
         }
     }
@@ -269,7 +268,7 @@ static rt_err_t rt_tcpdump_pcap_file_write(const void *buf, int len)
     length = write(fd, buf, len);
     if (length != len)
     {
-        dbg_log(DBG_ERROR, "write data failed, length: %d\n", length);
+        LOG_E("write data failed, length: %d\n", length);
         close(fd);
         return -RT_ERROR;
     }
@@ -313,7 +312,7 @@ static rt_err_t rt_tcpdump_pcap_file_init(void)
     {
         if (rt_device_open(tcpdump_pipe, RT_DEVICE_OFLAG_WRONLY) != RT_EOK)
         {
-            dbg_log(DBG_LOG, "not found pipe device!\n");
+            LOG_D("not found pipe device!\n");
             return -RT_ERROR;
         }
     }
@@ -382,7 +381,7 @@ static void rt_tcpdump_thread_entry(void *param)
         /* tcpdump deinit, the mailbox does not receive the data, exits the thread*/
         else
         {
-            dbg_log(DBG_INFO, "tcpdump stop and tcpdump thread exit!\n");
+            LOG_I("tcpdump stop and tcpdump thread exit!\n");
             close(fd);
             fd = -1;
 
@@ -436,7 +435,7 @@ static int rt_tcpdump_init(void)
 
     if (netif != RT_NULL)
     {
-        dbg_log(DBG_ERROR, "This command is running, please stop before you use the [tcpdump -p] command!\n");
+        LOG_E("This command is running, please stop before you use the [tcpdump -p] command!\n");
         return -RT_ERROR;
     }
 
@@ -449,7 +448,7 @@ static int rt_tcpdump_init(void)
     {
         if (tcpdump_pipe == RT_NULL)
         {
-            dbg_log(DBG_ERROR, "pipe is error!\n");
+            LOG_E("pipe is error!\n");
             return -RT_ERROR;
         }
     }
@@ -457,20 +456,20 @@ static int rt_tcpdump_init(void)
     device = (struct eth_device *)rt_device_find(eth);
     if (device == RT_NULL)
     {
-        dbg_log(DBG_ERROR, "network interface card [%s] device not find!\n", eth);
-        dbg_log(DBG_ERROR, "tcpdump thread startup failed and enter the correct network interface please!\n");
+        LOG_E("network interface card [%s] device not find!\n", eth);
+        LOG_E("tcpdump thread startup failed and enter the correct network interface please!\n");
         return -RT_ERROR;
     }
     if ((device->netif == RT_NULL) || (device->netif->linkoutput == RT_NULL))
     {
-        dbg_log(DBG_ERROR, "this device not e0!\n");
+        LOG_E("this device not e0!\n");
         return -RT_ERROR;
     }
 
     tcpdump_mb = rt_mb_create("tdrmb", TCPDUMP_MAX_MSG, RT_IPC_FLAG_FIFO);
     if (tcpdump_mb == RT_NULL)
     {
-        dbg_log(DBG_ERROR, "tcp dump mp create fail!\n");
+        LOG_E("tcp dump mp create fail!\n");
         return -RT_ERROR;
     }
 
@@ -479,7 +478,7 @@ static int rt_tcpdump_init(void)
     {
         rt_mb_delete(tcpdump_mb);
         tcpdump_mb = RT_NULL;
-        dbg_log(DBG_ERROR, "tcpdump thread create fail!\n");
+        LOG_E("tcpdump thread create fail!\n");
         return -RT_ERROR;
     }
 
@@ -503,7 +502,7 @@ static int rt_tcpdump_init(void)
 
     rt_thread_startup(tid);
 
-    dbg_log(DBG_INFO, "tcpdump start!\n");
+    LOG_I("tcpdump start!\n");
 
     return RT_EOK;
 }
@@ -515,7 +514,7 @@ static void rt_tcpdump_deinit(void)
 
     if (netif == RT_NULL)
     {
-        dbg_log(DBG_ERROR, "capture packet stopped, no repeat input required!\n");
+        LOG_E("capture packet stopped, no repeat input required!\n");
         return;
     }
 
@@ -575,7 +574,7 @@ static void rt_tcpdump_help_info_print(void)
 
 static void rt_tcpdump_error_info_deal(void)
 {
-    dbg_log(DBG_ERROR, "tcpdump command is incorrect, please refer to the help information!\n");
+    LOG_E("tcpdump command is incorrect, please refer to the help information!\n");
     rt_tcpdump_help_info_print();
 }
 

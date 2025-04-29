@@ -32,14 +32,14 @@ static void onenet_upload_entry(void *parameter)
     {
         value = rand() % 100;
 
-        if (onenet_mqtt_upload_digit("temperature", value) < 0)
+        if (onenet_mqtt_upload_digit("Brightness", value) < 0)
         {
             LOG_E("upload has an error, stop uploading");
             break;
         }
         else
         {
-            LOG_D("buffer : {\"temperature\":%d}", value);
+            LOG_D("buffer : {\"Brightness\":%d}", value);
         }
 
         rt_thread_delay(rt_tick_from_millisecond(5 * 1000));
@@ -105,7 +105,7 @@ static void onenet_cmd_rsp_cb(uint8_t *recv_data, size_t recv_size, uint8_t **re
     char res_buf[] = { "cmd is received!\n" };
 
     LOG_D("recv data is %x:%x\n", recv_data[0], recv_data[1]);
-    
+
     if(recv_data[0] == 0x00)
     {
         rt_pin_write(PIN_LED_B, recv_data[1] > 0 ? PIN_HIGH : PIN_LOW);

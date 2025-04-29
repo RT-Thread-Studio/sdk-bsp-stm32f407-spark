@@ -14,9 +14,9 @@
 #include <board.h>
 #include <msh.h>
 
-#include <wlan_mgnt.h>
-#include <wlan_prot.h>
-#include <wlan_cfg.h>
+#include <dev_wlan_mgnt.h>
+#include <dev_wlan_prot.h>
+#include <dev_wlan_cfg.h>
 #include <stdio.h>
 #include <stdlib.h>
 

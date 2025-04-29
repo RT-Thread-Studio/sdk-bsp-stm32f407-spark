@@ -9,7 +9,7 @@
  */
 
 #include <rtthread.h>
-#include <wlan_mgnt.h>
+#include <dev_wlan_mgnt.h>
 #include <webclient.h>
 #include <string.h>
 

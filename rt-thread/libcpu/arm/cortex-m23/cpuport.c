@@ -14,34 +14,7 @@
 
 #include <rtthread.h>
 
-struct exception_stack_frame
-{
-    rt_uint32_t r0;
-    rt_uint32_t r1;
-    rt_uint32_t r2;
-    rt_uint32_t r3;
-    rt_uint32_t r12;
-    rt_uint32_t lr;
-    rt_uint32_t pc;
-    rt_uint32_t psr;
-};
-
-struct stack_frame
-{
-    /* r4 ~ r7 low register */
-    rt_uint32_t r4;
-    rt_uint32_t r5;
-    rt_uint32_t r6;
-    rt_uint32_t r7;
-
-    /* r8 ~ r11 high register */
-    rt_uint32_t r8;
-    rt_uint32_t r9;
-    rt_uint32_t r10;
-    rt_uint32_t r11;
-
-    struct exception_stack_frame exception_stack_frame;
-};
+#include "cpuport.h"
 
 /* flag in interrupt handling */
 rt_uint32_t rt_interrupt_from_thread, rt_interrupt_to_thread;
@@ -109,7 +82,7 @@ void rt_hw_hard_fault_exception(struct exception_stack_frame *contex)
     rt_kprintf("r01: 0x%08x\n", contex->r1);
     rt_kprintf("r00: 0x%08x\n", contex->r0);
 
-    rt_kprintf("hard fault on thread: %s\n", rt_current_thread->name);
+    rt_kprintf("hard fault on thread: %s\n", rt_current_thread->parent.name);
 
 #if defined(RT_USING_FINSH) && defined(MSH_USING_BUILT_IN_COMMANDS)
     list_thread();
@@ -118,21 +91,3 @@ void rt_hw_hard_fault_exception(struct exception_stack_frame *contex)
     while (1);
 }
 
-#define SCB_CFSR        (*(volatile const unsigned *)0xE000ED28) /* Configurable Fault Status Register */
-#define SCB_HFSR        (*(volatile const unsigned *)0xE000ED2C) /* HardFault Status Register */
-#define SCB_MMAR        (*(volatile const unsigned *)0xE000ED34) /* MemManage Fault Address register */
-#define SCB_BFAR        (*(volatile const unsigned *)0xE000ED38) /* Bus Fault Address Register */
-#define SCB_AIRCR       (*(volatile unsigned long *)0xE000ED00)  /* Reset control Address Register */
-#define SCB_RESET_VALUE 0x05FA0004                               /* Reset value, write to SCB_AIRCR can reset cpu */
-
-#define SCB_CFSR_MFSR   (*(volatile const unsigned char*)0xE000ED28)  /* Memory-management Fault Status Register */
-#define SCB_CFSR_BFSR   (*(volatile const unsigned char*)0xE000ED29)  /* Bus Fault Status Register */
-#define SCB_CFSR_UFSR   (*(volatile const unsigned short*)0xE000ED2A) /* Usage Fault Status Register */
-
-/**
- * reset CPU
- */
-RT_WEAK void rt_hw_cpu_reset(void)
-{
-    SCB_AIRCR  = SCB_RESET_VALUE;//((0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |SCB_AIRCR_SYSRESETREQ_Msk);
-}

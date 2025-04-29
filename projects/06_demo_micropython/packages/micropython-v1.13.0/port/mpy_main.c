@@ -121,7 +121,7 @@ static void mp_sys_resource_gc(struct dfs_fdtable *fd_table_bak)
         {
             if ((i < fd_table_bak->maxfd && fd_table_bak->fds[i] == RT_NULL) || (i >= fd_table_bak->maxfd))
             {
-                close(i + DFS_FD_OFFSET);
+                close(i + DFS_STDIO_OFFSET);
             }
         }
     }
@@ -155,7 +155,7 @@ void mpy_main(const char *filename) {
 
     if (rt_thread_self()->stack_size < stack_size_check) 
     {
-        mp_printf(&mp_plat_print, "The stack (%.*s) size for executing MicroPython must be >= %d\n", RT_NAME_MAX, rt_thread_self()->name, stack_size_check);
+        mp_printf(&mp_plat_print, "The stack (%.*s) size for executing MicroPython must be >= %d\n", RT_NAME_MAX, rt_thread_self()->parent.name, stack_size_check);
     }
 
 #if MICROPY_PY_THREAD

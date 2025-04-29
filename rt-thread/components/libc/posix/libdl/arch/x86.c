@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2021, RT-Thread Development Team
+ * Copyright (c) 2006-2024 RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -12,6 +12,10 @@
 #include "../dlelf.h"
 
 #ifdef __i386__
+
+#define DBG_TAG           "posix.libdl.arch"
+#define DBG_LVL           DBG_INFO
+#include <rtdbg.h>
 
 #define R_X86_64_GLOB_DAT   6   /* Create GOT entry */
 #define R_X86_64_JUMP_SLOT  7   /* Create PLT entry */
@@ -32,19 +36,20 @@ int dlmodule_relocate(struct rt_dlmodule *module, Elf32_Rel *rel, Elf32_Addr sym
         case R_X86_64_JUMP_SLOT:
             *where = (Elf32_Addr)sym_val;
 
-            RT_DEBUG_LOG(RT_DEBUG_MODULE, ("R_X86_64_JUMP_SLOT: 0x%x -> 0x%x 0x%x\n",
-                  (uint32_t)where, *where, sym_val));
+            LOG_D("R_X86_64_JUMP_SLOT: 0x%x -> 0x%x 0x%x",
+                  (uint32_t)where, *where, sym_val);
             break;
         case R_X86_64_RELATIVE:
             *where = (Elf32_Addr)sym_val + *where;
-            RT_DEBUG_LOG(RT_DEBUG_MODULE, ("R_X86_64_RELATIVE: 0x%x -> 0x%x 0x%x\n",
-                  (uint32_t)where, *where, sym_val));
+            LOG_D("R_X86_64_RELATIVE: 0x%x -> 0x%x 0x%x",
+                  (uint32_t)where, *where, sym_val);
             break;
         default:
-            RT_DEBUG_LOG(RT_DEBUG_MODULE, ("X86ELF: invalid relocate TYPE %d\n", ELF32_R_TYPE(rel->r_info)));
+            LOG_D("X86ELF: invalid relocate TYPE %d", ELF32_R_TYPE(rel->r_info));
             return -1;
     }
 
     return 0;
 }
-#endif
+
+#endif /* __i386__ */

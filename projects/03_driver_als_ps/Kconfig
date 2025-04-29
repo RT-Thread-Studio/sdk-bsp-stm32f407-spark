@@ -15,6 +15,11 @@ config PKGS_DIR
     option env="PKGS_ROOT"
     default "packages"
 
+config PLATFORM_DIR
+    string
+    option env="PLATFORM_DIR"
+    default  "C:/Softwares/RT-ThreadStudio/repo/Local/Board_Support_Packages/STMicroelectronics/STM32F407-RT-SPARK/1.4.0/projects/03_driver_als_ps/platform"
+
 source "$RTT_DIR/Kconfig"
 source "$PKGS_DIR/Kconfig"
 source "$RTT_DIR/../libraries/Kconfig"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2021, RT-Thread Development Team
+ * Copyright (c) 2006-2025 RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -14,6 +14,7 @@
 
 #include <stddef.h>
 #include <rtthread.h>
+#include <rtdevice.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,20 +23,6 @@ extern "C" {
 #define AT_SW_VERSION                  "1.3.1"
 
 #define AT_CMD_NAME_LEN                16
-#define AT_END_MARK_LEN                4
-
-#ifndef AT_CMD_MAX_LEN
-#define AT_CMD_MAX_LEN                 128
-#endif
-
-/* the server AT commands new line sign */
-#if defined(AT_CMD_END_MARK_CRLF)
-#define AT_CMD_END_MARK                "\r\n"
-#elif defined(AT_CMD_END_MARK_CR)
-#define AT_CMD_END_MARK                "\r"
-#elif defined(AT_CMD_END_MARK_LF)
-#define AT_CMD_END_MARK                "\n"
-#endif
 
 #ifndef AT_SERVER_RECV_BUFF_LEN
 #define AT_SERVER_RECV_BUFF_LEN        256
@@ -51,7 +38,7 @@ extern "C" {
 #endif
 
 #define AT_CMD_EXPORT(_name_, _args_expr_, _test_, _query_, _setup_, _exec_)   \
-    RT_USED static const struct at_cmd __at_cmd_##_test_##_query_##_setup_##_exec_ RT_SECTION("RtAtCmdTab") = \
+    rt_used static const struct at_cmd __at_cmd_##_test_##_query_##_setup_##_exec_ rt_section("RtAtCmdTab") = \
     {                                                                          \
         _name_,                                                                \
         _args_expr_,                                                           \
@@ -100,10 +87,10 @@ struct at_server
     rt_err_t (*get_char)(struct at_server *server, char *ch, rt_int32_t timeout);
     rt_bool_t echo_mode;
 
+    char send_buffer[AT_SERVER_SEND_BUFF_LEN];
     char recv_buffer[AT_SERVER_RECV_BUFF_LEN];
     rt_size_t cur_recv_len;
     rt_sem_t rx_notice;
-    char end_mark[AT_END_MARK_LEN];
 
     rt_thread_t parser;
     void (*parser_entry)(struct at_server *server);
@@ -166,6 +153,12 @@ struct at_client
     at_status_t status;
     char end_sign;
 
+    char *send_buf;
+    /* The maximum supported send cmd length */
+    rt_size_t send_bufsz;
+    /* The length of last cmd */
+    rt_size_t last_cmd_len;
+
     /* the current received one line data buffer */
     char *recv_line_buf;
     /* The length of the currently received one line data */
@@ -181,6 +174,7 @@ struct at_client
 
     struct at_urc_table *urc_table;
     rt_size_t urc_table_size;
+    const struct at_urc *urc;
 
     rt_thread_t parser;
 };
@@ -205,7 +199,7 @@ int at_req_parse_args(const char *req_args, const char *req_expr, ...);
 #ifdef AT_USING_CLIENT
 
 /* AT client initialize and start*/
-int at_client_init(const char *dev_name,  rt_size_t recv_bufsz);
+int at_client_init(const char *dev_name, rt_size_t recv_bufsz, rt_size_t send_bufsz);
 
 /* ========================== multiple AT client function ============================ */
 
@@ -228,6 +222,7 @@ int at_obj_set_urc_table(at_client_t client, const struct at_urc * table, rt_siz
 
 /* AT client send commands to AT server and waiter response */
 int at_obj_exec_cmd(at_client_t client, at_response_t resp, const char *cmd_expr, ...);
+int at_obj_exec_cmd_format(at_client_t client, at_response_t resp, const char* format, const char *cmd_expr, ...);
 
 /* AT response object create and delete */
 at_response_t at_create_resp(rt_size_t buf_size, rt_size_t line_num, rt_int32_t timeout);
@@ -248,6 +243,7 @@ int at_resp_parse_line_args_by_kw(at_response_t resp, const char *keyword, const
  */
 
 #define at_exec_cmd(resp, ...)                   at_obj_exec_cmd(at_client_get_first(), resp, __VA_ARGS__)
+#define at_exec_cmd_format(resp, format, ...)    at_obj_exec_cmd_format(at_client_get_first(), resp, format, __VA_ARGS__)
 #define at_client_wait_connect(timeout)          at_client_obj_wait_connect(at_client_get_first(), timeout)
 #define at_client_send(buf, size)                at_client_obj_send(at_client_get_first(), buf, size)
 #define at_client_recv(buf, size, timeout)       at_client_obj_recv(at_client_get_first(), buf, size, timeout)

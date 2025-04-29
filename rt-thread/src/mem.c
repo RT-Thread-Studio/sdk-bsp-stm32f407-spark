@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2022, RT-Thread Development Team
+ * Copyright (c) 2006-2024, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -51,15 +51,14 @@
 #include <rtthread.h>
 
 #if defined (RT_USING_SMALL_MEM)
- /**
-  * memory item on the small mem
-  */
+
+#define DBG_TAG           "kernel.mem"
+#define DBG_LVL           DBG_INFO
+#include <rtdbg.h>
+
 struct rt_small_mem_item
 {
-    rt_ubase_t              pool_ptr;         /**< small memory object addr */
-#ifdef ARCH_CPU_64BIT
-    rt_uint32_t             resv;
-#endif /* ARCH_CPU_64BIT */
+    rt_uintptr_t            pool_ptr;         /**< small memory object addr */
     rt_size_t               next;             /**< next free item */
     rt_size_t               prev;             /**< prev free item */
 #ifdef RT_USING_MEMTRACE
@@ -83,24 +82,19 @@ struct rt_small_mem
     rt_size_t                   mem_size_aligned;       /**< aligned memory size */
 };
 
-#define HEAP_MAGIC 0x1ea0
+#define MIN_SIZE (sizeof(rt_uintptr_t) + sizeof(rt_size_t) + sizeof(rt_size_t))
 
-#ifdef ARCH_CPU_64BIT
-#define MIN_SIZE 24
-#else
-#define MIN_SIZE 12
-#endif /* ARCH_CPU_64BIT */
+#define MEM_MASK ((~(rt_size_t)0) - 1)
 
-#define MEM_MASK             0xfffffffe
-#define MEM_USED()         ((((rt_base_t)(small_mem)) & MEM_MASK) | 0x1)
-#define MEM_FREED()        ((((rt_base_t)(small_mem)) & MEM_MASK) | 0x0)
+#define MEM_USED(_mem)       ((((rt_uintptr_t)(_mem)) & MEM_MASK) | 0x1)
+#define MEM_FREED(_mem)      ((((rt_uintptr_t)(_mem)) & MEM_MASK) | 0x0)
 #define MEM_ISUSED(_mem)   \
-                      (((rt_base_t)(((struct rt_small_mem_item *)(_mem))->pool_ptr)) & (~MEM_MASK))
+                      (((rt_uintptr_t)(((struct rt_small_mem_item *)(_mem))->pool_ptr)) & (~MEM_MASK))
 #define MEM_POOL(_mem)     \
-    ((struct rt_small_mem *)(((rt_base_t)(((struct rt_small_mem_item *)(_mem))->pool_ptr)) & (MEM_MASK)))
+    ((struct rt_small_mem *)(((rt_uintptr_t)(((struct rt_small_mem_item *)(_mem))->pool_ptr)) & (MEM_MASK)))
 #define MEM_SIZE(_heap, _mem)      \
-    (((struct rt_small_mem_item *)(_mem))->next - ((rt_ubase_t)(_mem) - \
-    (rt_ubase_t)((_heap)->heap_ptr)) - RT_ALIGN(sizeof(struct rt_small_mem_item), RT_ALIGN_SIZE))
+    (((struct rt_small_mem_item *)(_mem))->next - ((rt_uintptr_t)(_mem) - \
+    (rt_uintptr_t)((_heap)->heap_ptr)) - RT_ALIGN(sizeof(struct rt_small_mem_item), RT_ALIGN_SIZE))
 
 #define MIN_SIZE_ALIGNED     RT_ALIGN(MIN_SIZE, RT_ALIGN_SIZE)
 #define SIZEOF_STRUCT_MEM    RT_ALIGN(sizeof(struct rt_small_mem_item), RT_ALIGN_SIZE)
@@ -165,8 +159,6 @@ static void plug_holes(struct rt_small_mem *m, struct rt_small_mem_item *mem)
 /**
  * @brief This function will initialize small memory management algorithm.
  *
- * @param m the small memory management object.
- *
  * @param name is the name of the small memory management object.
  *
  * @param begin_addr the beginning address of memory.
@@ -181,12 +173,12 @@ rt_smem_t rt_smem_init(const char    *name,
 {
     struct rt_small_mem_item *mem;
     struct rt_small_mem *small_mem;
-    rt_ubase_t start_addr, begin_align, end_align, mem_size;
+    rt_uintptr_t start_addr, begin_align, end_align, mem_size;
 
-    small_mem = (struct rt_small_mem *)RT_ALIGN((rt_ubase_t)begin_addr, RT_ALIGN_SIZE);
-    start_addr = (rt_ubase_t)small_mem + sizeof(*small_mem);
-    begin_align = RT_ALIGN((rt_ubase_t)start_addr, RT_ALIGN_SIZE);
-    end_align   = RT_ALIGN_DOWN((rt_ubase_t)begin_addr + size, RT_ALIGN_SIZE);
+    small_mem = (struct rt_small_mem *)RT_ALIGN((rt_uintptr_t)begin_addr, RT_ALIGN_SIZE);
+    start_addr = (rt_uintptr_t)small_mem + sizeof(*small_mem);
+    begin_align = RT_ALIGN((rt_uintptr_t)start_addr, RT_ALIGN_SIZE);
+    end_align   = RT_ALIGN_DOWN((rt_uintptr_t)begin_addr + size, RT_ALIGN_SIZE);
 
     /* alignment addr */
     if ((end_align > (2 * SIZEOF_STRUCT_MEM)) &&
@@ -198,7 +190,7 @@ rt_smem_t rt_smem_init(const char    *name,
     else
     {
         rt_kprintf("mem init, error begin address 0x%x, and end address 0x%x\n",
-                   (rt_ubase_t)begin_addr, (rt_ubase_t)begin_addr + size);
+                   (rt_uintptr_t)begin_addr, (rt_uintptr_t)begin_addr + size);
 
         return RT_NULL;
     }
@@ -214,12 +206,12 @@ rt_smem_t rt_smem_init(const char    *name,
     /* point to begin address of heap */
     small_mem->heap_ptr = (rt_uint8_t *)begin_align;
 
-    RT_DEBUG_LOG(RT_DEBUG_MEM, ("mem init, heap begin address 0x%x, size %d\n",
-                                (rt_ubase_t)small_mem->heap_ptr, small_mem->mem_size_aligned));
+    LOG_D("mem init, heap begin address 0x%x, size %d",
+            (rt_uintptr_t)small_mem->heap_ptr, small_mem->mem_size_aligned);
 
     /* initialize the start of the heap */
     mem        = (struct rt_small_mem_item *)small_mem->heap_ptr;
-    mem->pool_ptr = MEM_FREED();
+    mem->pool_ptr = MEM_FREED(small_mem);
     mem->next  = small_mem->mem_size_aligned + SIZEOF_STRUCT_MEM;
     mem->prev  = 0;
 #ifdef RT_USING_MEMTRACE
@@ -228,7 +220,7 @@ rt_smem_t rt_smem_init(const char    *name,
 
     /* initialize the end of the heap */
     small_mem->heap_end        = (struct rt_small_mem_item *)&small_mem->heap_ptr[mem->next];
-    small_mem->heap_end->pool_ptr = MEM_USED();
+    small_mem->heap_end->pool_ptr = MEM_USED(small_mem);
     small_mem->heap_end->next  = small_mem->mem_size_aligned + SIZEOF_STRUCT_MEM;
     small_mem->heap_end->prev  = small_mem->mem_size_aligned + SIZEOF_STRUCT_MEM;
 #ifdef RT_USING_MEMTRACE
@@ -262,7 +254,7 @@ rt_err_t rt_smem_detach(rt_smem_t m)
 RTM_EXPORT(rt_smem_detach);
 
 /**
- * @addtogroup MM
+ * @addtogroup group_MM
  */
 
 /**@{*/
@@ -289,16 +281,6 @@ void *rt_smem_alloc(rt_smem_t m, rt_size_t size)
     RT_ASSERT(rt_object_get_type(&m->parent) == RT_Object_Class_Memory);
     RT_ASSERT(rt_object_is_systemobject(&m->parent));
 
-    if (size != RT_ALIGN(size, RT_ALIGN_SIZE))
-    {
-        RT_DEBUG_LOG(RT_DEBUG_MEM, ("malloc size %d, but align to %d\n",
-                                    size, RT_ALIGN(size, RT_ALIGN_SIZE)));
-    }
-    else
-    {
-        RT_DEBUG_LOG(RT_DEBUG_MEM, ("malloc size %d\n", size));
-    }
-
     small_mem = (struct rt_small_mem *)m;
     /* alignment size */
     size = RT_ALIGN(size, RT_ALIGN_SIZE);
@@ -309,7 +291,7 @@ void *rt_smem_alloc(rt_smem_t m, rt_size_t size)
 
     if (size > small_mem->mem_size_aligned)
     {
-        RT_DEBUG_LOG(RT_DEBUG_MEM, ("no memory\n"));
+        LOG_D("no memory");
 
         return RT_NULL;
     }
@@ -342,7 +324,7 @@ void *rt_smem_alloc(rt_smem_t m, rt_size_t size)
 
                 /* create mem2 struct */
                 mem2       = (struct rt_small_mem_item *)&small_mem->heap_ptr[ptr2];
-                mem2->pool_ptr = MEM_FREED();
+                mem2->pool_ptr = MEM_FREED(small_mem);
                 mem2->next = mem->next;
                 mem2->prev = ptr;
 #ifdef RT_USING_MEMTRACE
@@ -374,10 +356,10 @@ void *rt_smem_alloc(rt_smem_t m, rt_size_t size)
                     small_mem->parent.max = small_mem->parent.used;
             }
             /* set small memory object */
-            mem->pool_ptr = MEM_USED();
+            mem->pool_ptr = MEM_USED(small_mem);
 #ifdef RT_USING_MEMTRACE
             if (rt_thread_self())
-                rt_smem_setname(mem, rt_thread_self()->name);
+                rt_smem_setname(mem, rt_thread_self()->parent.name);
             else
                 rt_smem_setname(mem, "NONE");
 #endif /* RT_USING_MEMTRACE */
@@ -390,14 +372,13 @@ void *rt_smem_alloc(rt_smem_t m, rt_size_t size)
 
                 RT_ASSERT(((small_mem->lfree == small_mem->heap_end) || (!MEM_ISUSED(small_mem->lfree))));
             }
-            RT_ASSERT((rt_ubase_t)mem + SIZEOF_STRUCT_MEM + size <= (rt_ubase_t)small_mem->heap_end);
-            RT_ASSERT((rt_ubase_t)((rt_uint8_t *)mem + SIZEOF_STRUCT_MEM) % RT_ALIGN_SIZE == 0);
-            RT_ASSERT((((rt_ubase_t)mem) & (RT_ALIGN_SIZE - 1)) == 0);
+            RT_ASSERT((rt_uintptr_t)mem + SIZEOF_STRUCT_MEM + size <= (rt_uintptr_t)small_mem->heap_end);
+            RT_ASSERT((rt_uintptr_t)((rt_uint8_t *)mem + SIZEOF_STRUCT_MEM) % RT_ALIGN_SIZE == 0);
+            RT_ASSERT((((rt_uintptr_t)mem) & (RT_ALIGN_SIZE - 1)) == 0);
 
-            RT_DEBUG_LOG(RT_DEBUG_MEM,
-                         ("allocate memory at 0x%x, size: %d\n",
-                          (rt_ubase_t)((rt_uint8_t *)mem + SIZEOF_STRUCT_MEM),
-                          (rt_ubase_t)(mem->next - ((rt_uint8_t *)mem - small_mem->heap_ptr))));
+            LOG_D("allocate memory at 0x%x, size: %d",
+                    (rt_uintptr_t)((rt_uint8_t *)mem + SIZEOF_STRUCT_MEM),
+                    (rt_uintptr_t)(mem->next - ((rt_uint8_t *)mem - small_mem->heap_ptr)));
 
             /* return the memory data except mem struct */
             return (rt_uint8_t *)mem + SIZEOF_STRUCT_MEM;
@@ -436,7 +417,7 @@ void *rt_smem_realloc(rt_smem_t m, void *rmem, rt_size_t newsize)
     newsize = RT_ALIGN(newsize, RT_ALIGN_SIZE);
     if (newsize > small_mem->mem_size_aligned)
     {
-        RT_DEBUG_LOG(RT_DEBUG_MEM, ("realloc: out of memory\n"));
+        LOG_D("realloc: out of memory");
 
         return RT_NULL;
     }
@@ -450,7 +431,7 @@ void *rt_smem_realloc(rt_smem_t m, void *rmem, rt_size_t newsize)
     if (rmem == RT_NULL)
         return rt_smem_alloc(&small_mem->parent, newsize);
 
-    RT_ASSERT((((rt_ubase_t)rmem) & (RT_ALIGN_SIZE - 1)) == 0);
+    RT_ASSERT((((rt_uintptr_t)rmem) & (RT_ALIGN_SIZE - 1)) == 0);
     RT_ASSERT((rt_uint8_t *)rmem >= (rt_uint8_t *)small_mem->heap_ptr);
     RT_ASSERT((rt_uint8_t *)rmem < (rt_uint8_t *)small_mem->heap_end);
 
@@ -472,7 +453,7 @@ void *rt_smem_realloc(rt_smem_t m, void *rmem, rt_size_t newsize)
 
         ptr2 = ptr + SIZEOF_STRUCT_MEM + newsize;
         mem2 = (struct rt_small_mem_item *)&small_mem->heap_ptr[ptr2];
-        mem2->pool_ptr = MEM_FREED();
+        mem2->pool_ptr = MEM_FREED(small_mem);
         mem2->next = mem->next;
         mem2->prev = ptr;
 #ifdef RT_USING_MEMTRACE
@@ -521,16 +502,10 @@ void rt_smem_free(void *rmem)
     if (rmem == RT_NULL)
         return;
 
-    RT_ASSERT((((rt_ubase_t)rmem) & (RT_ALIGN_SIZE - 1)) == 0);
+    RT_ASSERT((((rt_uintptr_t)rmem) & (RT_ALIGN_SIZE - 1)) == 0);
 
     /* Get the corresponding struct rt_small_mem_item ... */
     mem = (struct rt_small_mem_item *)((rt_uint8_t *)rmem - SIZEOF_STRUCT_MEM);
-
-    RT_DEBUG_LOG(RT_DEBUG_MEM,
-                 ("release memory 0x%x, size: %d\n",
-                  (rt_ubase_t)rmem,
-                  (rt_ubase_t)(mem->next - ((rt_uint8_t *)mem - small_mem->heap_ptr))));
-
     /* ... which has to be in a used state ... */
     small_mem = MEM_POOL(mem);
     RT_ASSERT(small_mem != RT_NULL);
@@ -541,8 +516,12 @@ void rt_smem_free(void *rmem)
               (rt_uint8_t *)rmem < (rt_uint8_t *)small_mem->heap_end);
     RT_ASSERT(MEM_POOL(&small_mem->heap_ptr[mem->next]) == small_mem);
 
+    LOG_D("release memory 0x%x, size: %d",
+            (rt_uintptr_t)rmem,
+            (rt_uintptr_t)(mem->next - ((rt_uint8_t *)mem - small_mem->heap_ptr)));
+
     /* ... and is now unused. */
-    mem->pool_ptr = MEM_FREED();
+    mem->pool_ptr = MEM_FREED(small_mem);
 #ifdef RT_USING_MEMTRACE
     rt_smem_setname(mem, "    ");
 #endif /* RT_USING_MEMTRACE */
@@ -564,7 +543,7 @@ RTM_EXPORT(rt_smem_free);
 #include <finsh.h>
 
 #ifdef RT_USING_MEMTRACE
-int memcheck(int argc, char *argv[])
+static int memcheck(int argc, char *argv[])
 {
     int position;
     rt_base_t level;
@@ -586,13 +565,20 @@ int memcheck(int argc, char *argv[])
         object = rt_list_entry(node, struct rt_object, list);
         /* find the specified object */
         if (name != RT_NULL && rt_strncmp(name, object->name, RT_NAME_MAX) != 0)
+        {
             continue;
+        }
         /* mem object */
         m = (struct rt_small_mem *)object;
+        if(rt_strncmp(m->parent.algorithm, "small", RT_NAME_MAX) != 0)
+        {
+            continue;
+        }
+
         /* check mem */
         for (mem = (struct rt_small_mem_item *)m->heap_ptr; mem != m->heap_end; mem = (struct rt_small_mem_item *)&m->heap_ptr[mem->next])
         {
-            position = (rt_ubase_t)mem - (rt_ubase_t)m->heap_ptr;
+            position = (rt_uintptr_t)mem - (rt_uintptr_t)m->heap_ptr;
             if (position < 0) goto __exit;
             if (position > (int)m->mem_size_aligned) goto __exit;
             if (MEM_POOL(mem) != m) goto __exit;
@@ -613,7 +599,7 @@ __exit:
 }
 MSH_CMD_EXPORT(memcheck, check memory data);
 
-int memtrace(int argc, char **argv)
+static int memtrace(int argc, char **argv)
 {
     struct rt_small_mem_item *mem;
     struct rt_small_mem *m;
@@ -632,15 +618,21 @@ int memtrace(int argc, char **argv)
         object = rt_list_entry(node, struct rt_object, list);
         /* find the specified object */
         if (name != RT_NULL && rt_strncmp(name, object->name, RT_NAME_MAX) != 0)
+        {
             continue;
+        }
         /* mem object */
         m = (struct rt_small_mem *)object;
+        if(rt_strncmp(m->parent.algorithm, "small", RT_NAME_MAX) != 0)
+        {
+            continue;
+        }
         /* show memory information */
         rt_kprintf("\nmemory heap address:\n");
         rt_kprintf("name    : %s\n", m->parent.parent.name);
-        rt_kprintf("total   : 0x%d\n", m->parent.total);
-        rt_kprintf("used    : 0x%d\n", m->parent.used);
-        rt_kprintf("max_used: 0x%d\n", m->parent.max);
+        rt_kprintf("total   : %d\n", m->parent.total);
+        rt_kprintf("used    : %d\n", m->parent.used);
+        rt_kprintf("max_used: %d\n", m->parent.max);
         rt_kprintf("heap_ptr: 0x%08x\n", m->heap_ptr);
         rt_kprintf("lfree   : 0x%08x\n", m->lfree);
         rt_kprintf("heap_end: 0x%08x\n", m->heap_end);

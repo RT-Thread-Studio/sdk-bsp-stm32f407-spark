@@ -40,7 +40,7 @@ static void can_rx_thread(void *parameter)
     while (1)
     {
         /* hdr 值为 - 1，表示直接从 uselist 链表读取数据 */
-        rxmsg.hdr = -1;
+        rxmsg.hdr_index = -1;
         /* 阻塞等待接收信号量 */
         rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
         /* 从 CAN 读取一帧数据 */

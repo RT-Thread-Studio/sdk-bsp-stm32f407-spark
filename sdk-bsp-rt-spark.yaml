@@ -86,16 +86,16 @@ template_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
   project_description: 描述
   project_name: rt-spark
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
 example_projects:
 - project_name: 01_kernel
   project_description: 内核学习示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/01_kernel
     target_path_offset: ''
@@ -119,12 +119,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 02_basic_led_blink
   project_description: LED 闪烁示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/02_basic_led_blink
     target_path_offset: ''
@@ -148,12 +148,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 02_basic_rgb_led
   project_description: RGB LED 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/02_basic_rgb_led
     target_path_offset: ''
@@ -177,12 +177,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 02_basic_key
   project_description: 按键示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/02_basic_key
     target_path_offset: ''
@@ -206,12 +206,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 02_basic_irq_beep
   project_description: 蜂鸣器示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/02_basic_irq_beep
     target_path_offset: ''
@@ -235,12 +235,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 02_basic_ir
   project_description: 红外遥控示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/02_basic_ir
     target_path_offset: ''
@@ -264,12 +264,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 02_basic_rtc
   project_description: RTC 和 RTC 闹钟的使用例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/02_basic_rtc
     target_path_offset: ''
@@ -293,12 +293,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 03_driver_lcd
   project_description: LCD 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/03_driver_lcd
     target_path_offset: ''
@@ -322,12 +322,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 03_driver_temp_humi
   project_description: 温湿度传感器示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/03_driver_temp_humi
     target_path_offset: ''
@@ -351,12 +351,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 03_driver_als_ps
   project_description: 接近与光强传感器示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/03_driver_als_ps
     target_path_offset: ''
@@ -380,12 +380,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 03_driver_axis
   project_description: 六轴传感器示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/03_driver_axis
     target_path_offset: ''
@@ -409,12 +409,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 03_driver_can
   project_description: CAN 通信例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/03_driver_can
     target_path_offset: ''
@@ -438,12 +438,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 03_driver_led_matrix
   project_description: LED MATRIX 闪烁例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/03_driver_led_matrix
     target_path_offset: ''
@@ -467,12 +467,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 04_component_usb_mouse
   project_description: USB 鼠标示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/04_component_usb_mouse
     target_path_offset: ''
@@ -496,12 +496,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 04_component_fs_tf_card
   project_description: TF 卡示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/04_component_fs_tf_card
     target_path_offset: ''
@@ -525,12 +525,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 04_component_pm
   project_description: 电源管理示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/04_component_pm
     target_path_offset: ''
@@ -554,12 +554,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 04_component_fal
   project_description: FAL 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/04_component_fal
     target_path_offset: ''
@@ -583,12 +583,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 04_component_kv
   project_description: KV 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/04_component_kv
     target_path_offset: ''
@@ -612,12 +612,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 04_component_fs_flash
   project_description: DFS 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/04_component_fs_flash
     target_path_offset: ''
@@ -641,12 +641,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_wifi_manager
   project_description: WIFI 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_wifi_manager
     target_path_offset: ''
@@ -670,12 +670,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_mqtt
   project_description: MQTT 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_mqtt
     target_path_offset: ''
@@ -699,12 +699,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_http_client
   project_description: HTTP Client 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_http_client
     target_path_offset: ''
@@ -728,12 +728,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_mbedtls
   project_description: mbedtls 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_mbedtls
     target_path_offset: ''
@@ -757,12 +757,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_ota_ymodem
   project_description: OTA ymodem 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_ota_ymodem
     target_path_offset: ''
@@ -786,12 +786,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_ota_http
   project_description: OTA http 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_ota_http
     target_path_offset: ''
@@ -815,12 +815,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_netutils
   project_description: 网络小工具示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_netutils
     target_path_offset: ''
@@ -844,12 +844,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_cloud_onenet
   project_description: onenet 云示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_cloud_onenet
     target_path_offset: ''
@@ -873,12 +873,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_cloud_ali_iotkit
   project_description: 阿里云示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_cloud_ali_iotkit
     target_path_offset: ''
@@ -902,12 +902,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 05_iot_web_server
   project_description: Web Server 示例
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/05_iot_web_server
     target_path_offset: ''
@@ -931,12 +931,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 06_demo_lvgl
   project_description: LVGL 例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/06_demo_lvgl
     target_path_offset: ''
@@ -960,12 +960,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 06_demo_micropython
   project_description: MicroPython 例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/06_demo_micropython
     target_path_offset: ''
@@ -989,12 +989,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 06_demo_rs485_led_matrix
   project_description: 板载 LED matrix 和 RS485 驱动例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/06_demo_rs485_led_matrix
     target_path_offset: ''
@@ -1018,12 +1018,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 06_demo_factory
   project_description: 出厂综合 Demo
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/06_demo_factory
     target_path_offset: ''
@@ -1047,12 +1047,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 06_demo_wavplayer
   project_description: Wav Player Demo
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/06_demo_wavplayer
     target_path_offset: ''
@@ -1076,12 +1076,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 06_demo_nes_simulator
   project_description: nes 游戏模拟器例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/06_demo_nes_simulator
     target_path_offset: ''
@@ -1105,12 +1105,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 07_module_key_matrix
   project_description: 矩阵键盘模块例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/07_module_key_matrix
     target_path_offset: ''
@@ -1134,12 +1134,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 07_module_spi_eth_enc28j60
   project_description: ENC28J60 网络模块例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/07_module_spi_eth_enc28j60
     target_path_offset: ''
@@ -1163,12 +1163,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 07_module_ultrasonic_sr04
   project_description: 超声波测距模块例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/07_module_ultrasonic_sr04
     target_path_offset: ''
@@ -1192,12 +1192,12 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 - project_name: 07_module_ws2812_led
   project_description: ws2812 led 灯带例程
-  project_type: rt-thread|@full|@4.1.1
+  project_type: rt-thread|@full|@5.2.0
   builtin_files:
   - source_path_offset: projects/07_module_ws2812_led
     target_path_offset: ''
@@ -1221,7 +1221,7 @@ example_projects:
     package_name: RT-Thread
     package_type: RT-Thread_Source_Code
     package_vendor: ''
-    package_version: 4.1.1
+    package_version: 5.2.0
     source_path_offset: ''
     target_path_offset: rt-thread
 yaml_version: 3

@@ -11,7 +11,7 @@
 
 //#include <spi_wifi_rw007.h>
 
-#include "spi_flash_sfud.h"
+#include "dev_spi_flash_sfud.h"
 /*导出页面*/
 PAGE_EXPORT(HWTest);
 

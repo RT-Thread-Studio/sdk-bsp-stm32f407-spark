@@ -13,7 +13,7 @@
 
 #ifdef RT_USING_PWM
 #include "drv_config.h"
-#include <drivers/rt_drv_pwm.h>
+#include <drivers/dev_pwm.h>
 
 //#define DRV_DEBUG
 #define LOG_TAG             "drv.pwm"

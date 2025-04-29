@@ -19,15 +19,25 @@
 #ifdef RT_USING_SIGNALS
 
 #ifndef RT_SIG_INFO_MAX
-#define RT_SIG_INFO_MAX 32
+    #ifdef ARCH_CPU_64BIT
+        #define RT_SIG_INFO_MAX 64
+    #else
+        #define RT_SIG_INFO_MAX 32
+    #endif /* ARCH_CPU_64BIT */
 #endif /* RT_SIG_INFO_MAX */
 
 #define DBG_TAG     "SIGN"
 #define DBG_LVL     DBG_WARNING
 #include <rtdbg.h>
 
-#define sig_mask(sig_no)    (1u << sig_no)
+#ifdef RT_USING_MUSLLIBC
+    #define sig_mask(sig_no)    (1u << (sig_no - 1))
+#else
+    #define sig_mask(sig_no)    (1u << sig_no)
+#endif
 #define sig_valid(sig_no)   (sig_no >= 0 && sig_no < RT_SIG_MAX)
+
+static struct rt_spinlock _thread_signal_lock = RT_SPINLOCK_INIT;
 
 struct siginfo_node
 {
@@ -41,28 +51,21 @@ void rt_thread_handle_sig(rt_bool_t clean_state);
 
 static void _signal_default_handler(int signo)
 {
+    RT_UNUSED(signo);
     LOG_I("handled signo[%d] with default action.", signo);
     return ;
 }
 
 static void _signal_entry(void *parameter)
 {
+    RT_UNUSED(parameter);
+
     rt_thread_t tid = rt_thread_self();
 
     /* handle signal */
     rt_thread_handle_sig(RT_FALSE);
 
 #ifdef RT_USING_SMP
-    {
-        struct rt_cpu* pcpu = rt_cpu_self();
-
-        pcpu->current_thread->cpus_lock_nest--;
-        if (pcpu->current_thread->cpus_lock_nest == 0)
-        {
-            pcpu->current_thread->scheduler_lock_nest--;
-        }
-
-    }
 #else
     /* return to thread */
     tid->sp = tid->sig_ret;
@@ -70,12 +73,12 @@ static void _signal_entry(void *parameter)
 #endif /* RT_USING_SMP */
 
     LOG_D("switch back to: 0x%08x\n", tid->sp);
-    tid->stat &= ~RT_THREAD_STAT_SIGNAL;
+    RT_SCHED_CTX(tid).stat &= ~RT_THREAD_STAT_SIGNAL;
 
 #ifdef RT_USING_SMP
-    rt_hw_context_switch_to((rt_base_t)&parameter, tid);
+    rt_hw_context_switch_to((rt_uintptr_t)&parameter, tid);
 #else
-    rt_hw_context_switch_to((rt_ubase_t)&(tid->sp));
+    rt_hw_context_switch_to((rt_uintptr_t)&(tid->sp));
 #endif /* RT_USING_SMP */
 }
 
@@ -93,23 +96,27 @@ static void _signal_deliver(rt_thread_t tid)
 {
     rt_base_t level;
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
 
     /* thread is not interested in pended signals */
     if (!(tid->sig_pending & tid->sig_mask))
     {
-        rt_hw_interrupt_enable(level);
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
         return;
     }
 
-    if ((tid->stat & RT_THREAD_STAT_MASK) == RT_THREAD_SUSPEND)
+    if ((RT_SCHED_CTX(tid).stat & RT_THREAD_SUSPEND_MASK) == RT_THREAD_SUSPEND_MASK)
     {
         /* resume thread to handle signal */
+#ifdef RT_USING_SMART
+        rt_thread_wakeup(tid);
+#else
         rt_thread_resume(tid);
+#endif
         /* add signal state */
-        tid->stat |= (RT_THREAD_STAT_SIGNAL | RT_THREAD_STAT_SIGNAL_PENDING);
+        RT_SCHED_CTX(tid).stat |= (RT_THREAD_STAT_SIGNAL | RT_THREAD_STAT_SIGNAL_PENDING);
 
-        rt_hw_interrupt_enable(level);
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
         /* re-schedule */
         rt_schedule();
@@ -119,9 +126,9 @@ static void _signal_deliver(rt_thread_t tid)
         if (tid == rt_thread_self())
         {
             /* add signal state */
-            tid->stat |= RT_THREAD_STAT_SIGNAL;
+            RT_SCHED_CTX(tid).stat |= RT_THREAD_STAT_SIGNAL;
 
-            rt_hw_interrupt_enable(level);
+            rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
             /* do signal action in self thread context */
             if (rt_interrupt_get_nest() == 0)
@@ -129,17 +136,17 @@ static void _signal_deliver(rt_thread_t tid)
                 rt_thread_handle_sig(RT_TRUE);
             }
         }
-        else if (!((tid->stat & RT_THREAD_STAT_SIGNAL_MASK) & RT_THREAD_STAT_SIGNAL))
+        else if (!((RT_SCHED_CTX(tid).stat & RT_THREAD_STAT_SIGNAL_MASK) & RT_THREAD_STAT_SIGNAL))
         {
             /* add signal state */
-            tid->stat |= (RT_THREAD_STAT_SIGNAL | RT_THREAD_STAT_SIGNAL_PENDING);
+            RT_SCHED_CTX(tid).stat |= (RT_THREAD_STAT_SIGNAL | RT_THREAD_STAT_SIGNAL_PENDING);
 
 #ifdef RT_USING_SMP
             {
                 int cpu_id;
 
-                cpu_id = tid->oncpu;
-                if ((cpu_id != RT_CPU_DETACHED) && (cpu_id != rt_hw_cpu_id()))
+                cpu_id = RT_SCHED_CTX(tid).oncpu;
+                if ((cpu_id != RT_CPU_DETACHED) && (cpu_id != rt_cpu_get_id()))
                 {
                     rt_uint32_t cpu_mask;
 
@@ -149,13 +156,13 @@ static void _signal_deliver(rt_thread_t tid)
             }
 #else
             /* point to the signal handle entry */
-            tid->stat &= ~RT_THREAD_STAT_SIGNAL_PENDING;
+            RT_SCHED_CTX(tid).stat &= ~RT_THREAD_STAT_SIGNAL_PENDING;
             tid->sig_ret = tid->sp;
             tid->sp = rt_hw_stack_init((void *)_signal_entry, RT_NULL,
                                        (void *)((char *)tid->sig_ret - 32), RT_NULL);
 #endif /* RT_USING_SMP */
 
-            rt_hw_interrupt_enable(level);
+            rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
             LOG_D("signal stack pointer @ 0x%08x", tid->sp);
 
             /* re-schedule */
@@ -163,7 +170,7 @@ static void _signal_deliver(rt_thread_t tid)
         }
         else
         {
-            rt_hw_interrupt_enable(level);
+            rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
         }
     }
 }
@@ -171,37 +178,38 @@ static void _signal_deliver(rt_thread_t tid)
 #ifdef RT_USING_SMP
 void *rt_signal_check(void* context)
 {
-    rt_base_t level;
+    rt_sched_lock_level_t level;
     int cpu_id;
     struct rt_cpu* pcpu;
     struct rt_thread *current_thread;
 
-    level = rt_hw_interrupt_disable();
-    cpu_id = rt_hw_cpu_id();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
+
+    cpu_id = rt_cpu_get_id();
     pcpu   = rt_cpu_index(cpu_id);
     current_thread = pcpu->current_thread;
 
     if (pcpu->irq_nest)
     {
-        rt_hw_interrupt_enable(level);
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
         return context;
     }
 
     if (current_thread->cpus_lock_nest == 1)
     {
-        if (current_thread->stat & RT_THREAD_STAT_SIGNAL_PENDING)
+        if (RT_SCHED_CTX(current_thread).stat & RT_THREAD_STAT_SIGNAL_PENDING)
         {
             void *sig_context;
 
-            current_thread->stat &= ~RT_THREAD_STAT_SIGNAL_PENDING;
+            RT_SCHED_CTX(current_thread).stat &= ~RT_THREAD_STAT_SIGNAL_PENDING;
 
-            rt_hw_interrupt_enable(level);
+            rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
             sig_context = rt_hw_stack_init((void *)_signal_entry, context,
-                    (void *)(context - 32), RT_NULL);
+                    (void*)((char*)context - 32), RT_NULL);
             return sig_context;
         }
     }
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
     return context;
 }
 #endif /* RT_USING_SMP */
@@ -230,10 +238,14 @@ rt_sighandler_t rt_signal_install(int signo, rt_sighandler_t handler)
 
     if (!sig_valid(signo)) return SIG_ERR;
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
     if (tid->sig_vectors == RT_NULL)
     {
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
+
         rt_thread_alloc_sig(tid);
+
+        level = rt_spin_lock_irqsave(&_thread_signal_lock);
     }
 
     if (tid->sig_vectors)
@@ -244,7 +256,7 @@ rt_sighandler_t rt_signal_install(int signo, rt_sighandler_t handler)
         else if (handler == SIG_DFL) tid->sig_vectors[signo] = _signal_default_handler;
         else tid->sig_vectors[signo] = handler;
     }
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
     return old;
 }
@@ -265,11 +277,11 @@ void rt_signal_mask(int signo)
     rt_base_t level;
     rt_thread_t tid = rt_thread_self();
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
 
     tid->sig_mask &= ~sig_mask(signo);
 
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 }
 
 /**
@@ -288,19 +300,19 @@ void rt_signal_unmask(int signo)
     rt_base_t level;
     rt_thread_t tid = rt_thread_self();
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
 
     tid->sig_mask |= sig_mask(signo);
 
     /* let thread handle pended signals */
     if (tid->sig_mask & tid->sig_pending)
     {
-        rt_hw_interrupt_enable(level);
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
         _signal_deliver(tid);
     }
     else
     {
-        rt_hw_interrupt_enable(level);
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
     }
 }
 
@@ -338,7 +350,7 @@ int rt_signal_wait(const rt_sigset_t *set, rt_siginfo_t *si, rt_int32_t timeout)
     /* clear siginfo to avoid unknown value */
     memset(si, 0x0, sizeof(rt_siginfo_t));
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
 
     /* already pending */
     if (tid->sig_pending & *set) goto __done;
@@ -350,9 +362,9 @@ int rt_signal_wait(const rt_sigset_t *set, rt_siginfo_t *si, rt_int32_t timeout)
     }
 
     /* suspend self thread */
-    rt_thread_suspend(tid);
+    rt_thread_suspend_with_flag(tid, RT_UNINTERRUPTIBLE);
     /* set thread stat as waiting for signal */
-    tid->stat |= RT_THREAD_STAT_SIGNAL_WAIT;
+    RT_SCHED_CTX(tid).stat |= RT_THREAD_STAT_SIGNAL_WAIT;
 
     /* start timeout timer */
     if (timeout != RT_WAITING_FOREVER)
@@ -363,21 +375,21 @@ int rt_signal_wait(const rt_sigset_t *set, rt_siginfo_t *si, rt_int32_t timeout)
                          &timeout);
         rt_timer_start(&(tid->thread_timer));
     }
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
     /* do thread scheduling */
     rt_schedule();
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
 
     /* remove signal waiting flag */
-    tid->stat &= ~RT_THREAD_STAT_SIGNAL_WAIT;
+    RT_SCHED_CTX(tid).stat &= ~RT_THREAD_STAT_SIGNAL_WAIT;
 
     /* check errno of thread */
     if (tid->error == -RT_ETIMEOUT)
     {
         tid->error = RT_EOK;
-        rt_hw_interrupt_enable(level);
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
         /* timer timeout */
         ret = -RT_ETIMEOUT;
@@ -431,7 +443,7 @@ __done:
      }
 
 __done_int:
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
 __done_return:
     return ret;
@@ -444,11 +456,11 @@ void rt_thread_handle_sig(rt_bool_t clean_state)
     rt_thread_t tid = rt_thread_self();
     struct siginfo_node *si_node;
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
     if (tid->sig_pending & tid->sig_mask)
     {
         /* if thread is not waiting for signal */
-        if (!(tid->stat & RT_THREAD_STAT_SIGNAL_WAIT))
+        if (!(RT_SCHED_CTX(tid).stat & RT_THREAD_STAT_SIGNAL_WAIT))
         {
             while (tid->sig_pending & tid->sig_mask)
             {
@@ -467,12 +479,12 @@ void rt_thread_handle_sig(rt_bool_t clean_state)
                 signo   = si_node->si.si_signo;
                 handler = tid->sig_vectors[signo];
                 tid->sig_pending &= ~sig_mask(signo);
-                rt_hw_interrupt_enable(level);
+                rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
                 LOG_D("handle signal: %d, handler 0x%08x", signo, handler);
                 if (handler) handler(signo);
 
-                level = rt_hw_interrupt_disable();
+                level = rt_spin_lock_irqsave(&_thread_signal_lock);
                 error = -RT_EINTR;
 
                 rt_mp_free(si_node); /* release this siginfo node */
@@ -483,7 +495,7 @@ void rt_thread_handle_sig(rt_bool_t clean_state)
             /* whether clean signal status */
             if (clean_state == RT_TRUE)
             {
-                tid->stat &= ~RT_THREAD_STAT_SIGNAL;
+                RT_SCHED_CTX(tid).stat &= ~RT_THREAD_STAT_SIGNAL;
             }
             else
             {
@@ -491,12 +503,13 @@ void rt_thread_handle_sig(rt_bool_t clean_state)
             }
         }
     }
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 }
 
 void rt_thread_alloc_sig(rt_thread_t tid)
 {
     int index;
+    rt_bool_t need_free = RT_FALSE;
     rt_base_t level;
     rt_sighandler_t *vectors;
 
@@ -508,9 +521,23 @@ void rt_thread_alloc_sig(rt_thread_t tid)
         vectors[index] = _signal_default_handler;
     }
 
-    level = rt_hw_interrupt_disable();
-    tid->sig_vectors = vectors;
-    rt_hw_interrupt_enable(level);
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
+
+    if (tid->sig_vectors == RT_NULL)
+    {
+        tid->sig_vectors = vectors;
+    }
+    else
+    {
+        need_free = RT_TRUE;
+    }
+
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
+
+    if (need_free)
+    {
+        rt_free(vectors);
+    }
 }
 
 void rt_thread_free_sig(rt_thread_t tid)
@@ -519,13 +546,13 @@ void rt_thread_free_sig(rt_thread_t tid)
     struct siginfo_node *si_node;
     rt_sighandler_t *sig_vectors;
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
     si_node = (struct siginfo_node *)tid->si_list;
     tid->si_list = RT_NULL;
 
     sig_vectors = tid->sig_vectors;
     tid->sig_vectors = RT_NULL;
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
     if (si_node)
     {
@@ -573,7 +600,7 @@ int rt_thread_kill(rt_thread_t tid, int sig)
     si.si_code  = SI_USER;
     si.si_value.sival_ptr = RT_NULL;
 
-    level = rt_hw_interrupt_disable();
+    level = rt_spin_lock_irqsave(&_thread_signal_lock);
     if (tid->sig_pending & sig_mask(sig))
     {
         /* whether already emits this signal? */
@@ -593,12 +620,12 @@ int rt_thread_kill(rt_thread_t tid, int sig)
             if (entry->si.si_signo == sig)
             {
                 memcpy(&(entry->si), &si, sizeof(siginfo_t));
-                rt_hw_interrupt_enable(level);
+                rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
                 return 0;
             }
         }
     }
-    rt_hw_interrupt_enable(level);
+    rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
 
     si_node = (struct siginfo_node *) rt_mp_alloc(_siginfo_pool, 0);
     if (si_node)
@@ -606,7 +633,7 @@ int rt_thread_kill(rt_thread_t tid, int sig)
         rt_slist_init(&(si_node->list));
         memcpy(&(si_node->si), &si, sizeof(siginfo_t));
 
-        level = rt_hw_interrupt_disable();
+        level = rt_spin_lock_irqsave(&_thread_signal_lock);
 
         if (tid->si_list)
         {
@@ -623,11 +650,12 @@ int rt_thread_kill(rt_thread_t tid, int sig)
         /* a new signal */
         tid->sig_pending |= sig_mask(sig);
 
-        rt_hw_interrupt_enable(level);
+        rt_spin_unlock_irqrestore(&_thread_signal_lock, level);
     }
     else
     {
         LOG_E("The allocation of signal info node failed.");
+        return -RT_EEMPTY;
     }
 
     /* deliver signal to this thread */

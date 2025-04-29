@@ -7,375 +7,601 @@
  * Date           Author       Notes
  * 2006-03-12     Bernard      first version
  * 2018-11-02     heyuanjie    fix complie error in iar
+ * 2021-02-03     lizhirui     add 64-bit arch support and riscv64 arch support
+ * 2021-08-26     linzhenxing  add lwp_setcwd\lwp_getcwd
+ * 2023-02-20     wangxiaoyao  inv icache before new app startup
+ * 2023-02-20     wangxiaoyao  fix bug on foreground app switch
+ * 2023-10-16     Shell        Support a new backtrace framework
+ * 2023-11-17     xqyjlj       add process group and session support
+ * 2023-11-30     Shell        add lwp_startup()
  */
 
-#include <rtthread.h>
-#include <rthw.h>
-#include <dfs_file.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/statfs.h>
-
-#ifndef RT_USING_DFS
-    #error  "lwp need file system(RT_USING_DFS)"
-#endif
-
-#include "lwp.h"
-
-#define DBG_TAG    "LWP"
-#define DBG_LVL    DBG_WARNING
+#define DBG_TAG "lwp"
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
-extern void lwp_user_entry(void *args, const void *text, void *data);
+#include <rthw.h>
+#include <rtthread.h>
+
+#include <dfs_file.h>
+#include <unistd.h>
+#include <stdio.h> /* rename() */
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/statfs.h> /* statfs() */
+
+#include <lwp_elf.h>
+
+#ifndef RT_USING_DFS
+#error "lwp need file system(RT_USING_DFS)"
+#endif
+
+#include "lwp_internal.h"
+#include "lwp_arch.h"
+#include "lwp_arch_comm.h"
+#include "lwp_signal.h"
+#include "lwp_dbg.h"
+#include <terminal/terminal.h>
+
+#ifdef ARCH_MM_MMU
+#include <lwp_user_mm.h>
+#endif /* end of ARCH_MM_MMU */
+
+
+#ifndef O_DIRECTORY
+#define O_DIRECTORY 0x200000
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY 0x10000
+#endif
+
+#ifdef DFS_USING_WORKDIR
+extern char working_directory[];
+#endif
+
+static int lwp_component_init(void)
+{
+    int rc;
+    if ((rc = lwp_tid_init()) != RT_EOK)
+    {
+        LOG_E("%s: lwp_component_init() failed", __func__);
+    }
+    else if ((rc = lwp_pid_init()) != RT_EOK)
+    {
+        LOG_E("%s: lwp_pid_init() failed", __func__);
+    }
+    else if ((rc = rt_channel_component_init()) != RT_EOK)
+    {
+        LOG_E("%s: rt_channel_component_init failed", __func__);
+    }
+    else if ((rc = lwp_futex_init()) != RT_EOK)
+    {
+        LOG_E("%s: lwp_futex_init() failed", __func__);
+    }
+    return rc;
+}
+INIT_COMPONENT_EXPORT(lwp_component_init);
+
+void lwp_setcwd(char *buf)
+{
+    struct rt_lwp *lwp = RT_NULL;
+
+    if(strlen(buf) >= DFS_PATH_MAX)
+    {
+        rt_kprintf("buf too long!\n");
+        return ;
+    }
+
+    lwp = (struct rt_lwp *)rt_thread_self()->lwp;
+    if (lwp)
+    {
+        rt_strncpy(lwp->working_directory, buf, DFS_PATH_MAX - 1);
+    }
+    else
+    {
+        rt_strncpy(working_directory, buf, DFS_PATH_MAX - 1);
+    }
+
+    return ;
+}
+
+char *lwp_getcwd(void)
+{
+    char *dir_buf = RT_NULL;
+    struct rt_lwp *lwp = RT_NULL;
+    rt_thread_t thread = rt_thread_self();
+
+    if (thread)
+    {
+        lwp = (struct rt_lwp *)thread->lwp;
+    }
+
+    if (lwp)
+    {
+        if(lwp->working_directory[0] != '/')
+        {
+            dir_buf = &working_directory[0];
+        }
+        else
+        {
+            dir_buf = &lwp->working_directory[0];
+        }
+    }
+    else
+        dir_buf = &working_directory[0];
+
+    return dir_buf;
+}
 
 /**
  * RT-Thread light-weight process
  */
 void lwp_set_kernel_sp(uint32_t *sp)
 {
-    struct rt_lwp *user_data;
-    user_data = (struct rt_lwp *)rt_thread_self()->lwp;
-    user_data->kernel_sp = sp;
+    rt_thread_self()->kernel_sp = (rt_uint32_t *)sp;
 }
 
 uint32_t *lwp_get_kernel_sp(void)
 {
-    struct rt_lwp *user_data;
-    user_data = (struct rt_lwp *)rt_thread_self()->lwp;
-
-    return user_data->kernel_sp;
-}
-
-static int lwp_argscopy(struct rt_lwp *lwp, int argc, char **argv)
-{
-    int size = sizeof(int)*3; /* store argc, argv, NULL */
-    int *args;
-    char *str;
-    char **new_argv;
-    int i;
-    int len;
-
-    for (i = 0; i < argc; i ++)
+#ifdef ARCH_MM_MMU
+    return (uint32_t *)rt_thread_self()->sp;
+#else
+    uint32_t* kernel_sp;
+    extern rt_uint32_t rt_interrupt_from_thread;
+    extern rt_uint32_t rt_thread_switch_interrupt_flag;
+    if (rt_thread_switch_interrupt_flag)
     {
-        size += (rt_strlen(argv[i]) + 1);
-    }
-    size  += (sizeof(int) * argc);
-
-    args = (int*)rt_malloc(size);
-    if (args == RT_NULL)
-        return -1;
-
-    str = (char*)((int)args + (argc + 3) * sizeof(int));
-    new_argv = (char**)&args[2];
-    args[0] = argc;
-    args[1] = (int)new_argv;
-
-    for (i = 0; i < argc; i ++)
-    {
-        len = rt_strlen(argv[i]) + 1;
-        new_argv[i] = str;
-        rt_memcpy(str, argv[i], len);
-        str += len;
-    }
-    new_argv[i] = 0;
-    lwp->args = args;
-
-    return 0;
-}
-
-static int lwp_load(const char *filename, struct rt_lwp *lwp, uint8_t *load_addr, size_t addr_size)
-{
-    int fd;
-    uint8_t *ptr;
-    int result = RT_EOK;
-    int nbytes;
-    struct lwp_header header;
-    struct lwp_chunk  chunk;
-
-    /* check file name */
-    RT_ASSERT(filename != RT_NULL);
-    /* check lwp control block */
-    RT_ASSERT(lwp != RT_NULL);
-
-    if (load_addr != RT_NULL)
-    {
-        lwp->lwp_type = LWP_TYPE_FIX_ADDR;
-        ptr = load_addr;
+        kernel_sp = (uint32_t *)((rt_thread_t)rt_container_of(rt_interrupt_from_thread, struct rt_thread, sp))->kernel_sp;
     }
     else
     {
-        lwp->lwp_type = LWP_TYPE_DYN_ADDR;
-        ptr = RT_NULL;
+        kernel_sp = (uint32_t *)rt_thread_self()->kernel_sp;
     }
-
-    /* open lwp */
-    fd = open(filename, 0, O_RDONLY);
-    if (fd < 0)
-    {
-        dbg_log(DBG_ERROR, "open file:%s failed!\n", filename);
-        result = -RT_ENOSYS;
-        goto _exit;
-    }
-
-    /* read lwp header */
-    nbytes = read(fd, &header, sizeof(struct lwp_header));
-    if (nbytes != sizeof(struct lwp_header))
-    {
-        dbg_log(DBG_ERROR, "read lwp header return error size: %d!\n", nbytes);
-        result = -RT_EIO;
-        goto _exit;
-    }
-
-    /* check file header */
-    if (header.magic != LWP_MAGIC)
-    {
-        dbg_log(DBG_ERROR, "erro header magic number: 0x%02X\n", header.magic);
-        result = -RT_EINVAL;
-        goto _exit;
-    }
-
-    /* read text chunk info */
-    nbytes = read(fd, &chunk, sizeof(struct lwp_chunk));
-    if (nbytes != sizeof(struct lwp_chunk))
-    {
-        dbg_log(DBG_ERROR, "read text chunk info failed!\n");
-        result = -RT_EIO;
-        goto _exit;
-    }
-
-    dbg_log(DBG_LOG, "chunk name: %s, total len %d, data %d, need space %d!\n",
-            "text", /*chunk.name*/ chunk.total_len, chunk.data_len, chunk.data_len_space);
-
-    /* load text */
-    {
-        lwp->text_size = RT_ALIGN(chunk.data_len_space, 4);
-        if (load_addr)
-            lwp->text_entry = ptr;
-        else
-        {
-#ifdef RT_USING_CACHE
-            lwp->text_entry = (rt_uint8_t *)rt_malloc_align(lwp->text_size, RT_CPU_CACHE_LINE_SZ);
-#else
-            lwp->text_entry = (rt_uint8_t *)rt_malloc(lwp->text_size);
+    return kernel_sp;
 #endif
-
-            if (lwp->text_entry == RT_NULL)
-            {
-                dbg_log(DBG_ERROR, "alloc text memory faild!\n");
-                result = -RT_ENOMEM;
-                goto _exit;
-            }
-            else
-            {
-                dbg_log(DBG_LOG, "lwp text malloc : %p, size: %d!\n", lwp->text_entry, lwp->text_size);
-            }
-        }
-        dbg_log(DBG_INFO, "load text %d  => (0x%08x, 0x%08x)\n", lwp->text_size, (uint32_t)lwp->text_entry, (uint32_t)lwp->text_entry + lwp->text_size);
-
-        nbytes = read(fd, lwp->text_entry, chunk.data_len);
-        if (nbytes != chunk.data_len)
-        {
-            dbg_log(DBG_ERROR, "read text region from file failed!\n");
-            result = -RT_EIO;
-            goto _exit;
-        }
-#ifdef RT_USING_CACHE
-        else
-        {
-            rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, lwp->text_entry, lwp->text_size);
-            rt_hw_cpu_icache_ops(RT_HW_CACHE_INVALIDATE, lwp->text_entry, lwp->text_size);
-        }
-#endif
-
-        if (ptr != RT_NULL) ptr += nbytes;
-
-        /* skip text hole */
-        if ((chunk.total_len - sizeof(struct lwp_chunk) - chunk.data_len))
-        {
-            dbg_log(DBG_LOG, "skip text hole %d!\n", (chunk.total_len - sizeof(struct lwp_chunk) - chunk.data_len));
-            lseek(fd, (chunk.total_len - sizeof(struct lwp_chunk) - chunk.data_len), SEEK_CUR);
-        }
-    }
-
-    /* load data */
-    nbytes = read(fd, &chunk, sizeof(struct lwp_chunk));
-    if (nbytes != sizeof(struct lwp_chunk))
-    {
-        dbg_log(DBG_ERROR, "read data chunk info failed!\n");
-        result = -RT_EIO;
-        goto _exit;
-    }
-
-    dbg_log(DBG_LOG, "chunk name: %s, total len %d, data %d, need space %d!\n",
-            chunk.name, chunk.total_len, chunk.data_len, chunk.data_len_space);
-
-    {
-        lwp->data_size = RT_ALIGN(chunk.data_len_space, 4);
-        if (load_addr)
-            lwp->data = ptr;
-        else
-        {
-            lwp->data = rt_malloc(lwp->data_size);
-            if (lwp->data == RT_NULL)
-            {
-                dbg_log(DBG_ERROR, "alloc data memory faild!\n");
-                result = -RT_ENOMEM;
-                goto _exit;
-            }
-            else
-            {
-                dbg_log(DBG_LOG, "lwp data malloc : %p, size: %d!\n", lwp->data, lwp->data_size);
-                rt_memset(lwp->data, 0, lwp->data_size);
-            }
-        }
-
-        dbg_log(DBG_INFO, "load data %d => (0x%08x, 0x%08x)\n", lwp->data_size, (uint32_t)lwp->data, (uint32_t)lwp->data + lwp->data_size);
-        nbytes = read(fd, lwp->data, chunk.data_len);
-        if (nbytes != chunk.data_len)
-        {
-            dbg_log(DBG_ERROR, "read data region from file failed!\n");
-            result = -RT_ERROR;
-            goto _exit;
-        }
-    }
-
-_exit:
-    if (fd >= 0)
-        close(fd);
-
-    if (result != RT_EOK)
-    {
-        if (lwp->lwp_type == LWP_TYPE_DYN_ADDR)
-        {
-            dbg_log(DBG_ERROR, "lwp dynamic load faild, %d\n", result);
-            if (lwp->text_entry)
-            {
-                dbg_log(DBG_LOG, "lwp text free: %p\n", lwp->text_entry);
-#ifdef RT_USING_CACHE
-                rt_free_align(lwp->text_entry);
-#else
-                rt_free(lwp->text_entry);
-#endif
-            }
-            if (lwp->data)
-            {
-                dbg_log(DBG_LOG, "lwp data free: %p\n", lwp->data);
-                rt_free(lwp->data);
-            }
-        }
-    }
-
-    return result;
 }
 
-static void lwp_cleanup(struct rt_thread *tid)
+
+/* lwp-thread clean up routine */
+void lwp_cleanup(struct rt_thread *tid)
 {
     struct rt_lwp *lwp;
 
-    dbg_log(DBG_INFO, "thread: %s, stack_addr: %08X\n", tid->name, tid->stack_addr);
-
-    lwp = (struct rt_lwp *)tid->lwp;
-
-    if (lwp->lwp_type == LWP_TYPE_DYN_ADDR)
+    if (tid == NULL)
     {
-        dbg_log(DBG_INFO, "dynamic lwp\n");
-        if (lwp->text_entry)
-        {
-            dbg_log(DBG_LOG, "lwp text free: %p\n", lwp->text_entry);
-#ifdef RT_USING_CACHE
-            rt_free_align(lwp->text_entry);
-#else
-            rt_free(lwp->text_entry);
-#endif
-        }
-        if (lwp->data)
-        {
-            dbg_log(DBG_LOG, "lwp data free: %p\n", lwp->data);
-            rt_free(lwp->data);
-        }
+        LOG_I("%s: invalid parameter tid == NULL", __func__);
+        return;
     }
+    else
+        LOG_D("cleanup thread: %s, stack_addr: 0x%x", tid->parent.name, tid->stack_addr);
 
-    dbg_log(DBG_LOG, "lwp free memory pages\n");
-    rt_lwp_mem_deinit(lwp);
+    /**
+     * Brief: lwp thread cleanup
+     *
+     * Note: Critical Section
+     * - thread control block (RW. It's ensured that no one else can access tcb
+     *   other than itself)
+     */
+    lwp = (struct rt_lwp *)tid->lwp;
+    lwp_thread_signal_detach(&tid->signal);
 
-    /* cleanup fd table */
-    rt_free(lwp->fdt.fds);
-    rt_free(lwp->args);
-
-    dbg_log(DBG_LOG, "lwp free: %p\n", lwp);
-    rt_free(lwp);
-
-    /* TODO: cleanup fd table */
+    /* tty will be release in lwp_ref_dec() if ref is cleared */
+    lwp_ref_dec(lwp);
+    return;
 }
 
-static void lwp_thread(void *parameter)
+static void lwp_execve_setup_stdio(struct rt_lwp *lwp)
+{
+    struct dfs_fdtable *lwp_fdt;
+    struct dfs_file *cons_file;
+    int cons_fd;
+
+    lwp_fdt = &lwp->fdt;
+
+    /* open console */
+    cons_fd = open("/dev/console", O_RDWR);
+    if (cons_fd < 0)
+    {
+        LOG_E("%s: Cannot open console tty", __func__);
+        return ;
+    }
+    LOG_D("%s: open console as fd %d", __func__, cons_fd);
+
+    /* init 4 fds */
+    lwp_fdt->fds = rt_calloc(4, sizeof(void *));
+    if (lwp_fdt->fds)
+    {
+        cons_file = fd_get(cons_fd);
+        lwp_fdt->maxfd = 4;
+        fdt_fd_associate_file(lwp_fdt, 0, cons_file);
+        fdt_fd_associate_file(lwp_fdt, 1, cons_file);
+        fdt_fd_associate_file(lwp_fdt, 2, cons_file);
+    }
+
+    close(cons_fd);
+    return;
+}
+
+static void _lwp_thread_entry(void *parameter)
 {
     rt_thread_t tid;
     struct rt_lwp *lwp;
 
-    lwp = (struct rt_lwp *)parameter;
-    rt_lwp_mem_init(lwp);
     tid = rt_thread_self();
-    tid->lwp = lwp;
+    lwp = (struct rt_lwp *)tid->lwp;
     tid->cleanup = lwp_cleanup;
+    tid->user_stack = RT_NULL;
 
-    lwp_user_entry(lwp->args, lwp->text_entry, lwp->data);
+    if (lwp->debug)
+    {
+        lwp->bak_first_inst = *(uint32_t *)lwp->text_entry;
+        *(uint32_t *)lwp->text_entry = dbg_get_ins();
+        rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, lwp->text_entry, sizeof(uint32_t));
+        icache_invalid_all();
+    }
+
+    /**
+     * without ASID support, it will be a special case when trying to run application
+     * and exit multiple times and a same page frame allocated to it bound to
+     * different text segment. Then we are in a situation where icache contains
+     * out-of-dated data and must be handle by the running core itself.
+     * with ASID support, this should be a rare case that ASID & page frame both
+     * identical to previous running application.
+     *
+     * For a new application loaded into memory, icache are seen as empty. And there
+     * should be nothing in the icache entry to match. So this icache invalidation
+     * operation should have barely influence.
+     */
+    rt_hw_icache_invalidate_all();
+
+#ifdef ARCH_MM_MMU
+    arch_start_umode(lwp->args, lwp->text_entry, (void *)USER_STACK_VEND, (char *)tid->stack_addr + tid->stack_size);
+#else
+    arch_start_umode(lwp->args, lwp->text_entry, lwp->data_entry, (void *)((uint32_t)lwp->data_entry + lwp->data_size));
+#endif /* ARCH_MM_MMU */
 }
 
-struct rt_lwp *rt_lwp_self(void)
+struct rt_lwp *lwp_self(void)
 {
-    return (struct rt_lwp *)rt_thread_self()->lwp;
+    rt_thread_t tid;
+
+    tid = rt_thread_self();
+    if (tid)
+    {
+        return (struct rt_lwp *)tid->lwp;
+    }
+
+    return RT_NULL;
 }
 
-int exec(char *filename, int argc, char **argv)
+rt_err_t lwp_children_register(struct rt_lwp *parent, struct rt_lwp *child)
 {
-    struct rt_lwp *lwp;
+    /* lwp add to children link */
+    LWP_LOCK(parent);
+    child->sibling = parent->first_child;
+    parent->first_child = child;
+    child->parent = parent;
+    LWP_UNLOCK(parent);
+
+    LOG_D("%s(parent=%p, child=%p)", __func__, parent, child);
+    /* parent holds reference to child */
+    lwp_ref_inc(parent);
+    /* child holds reference to parent */
+    lwp_ref_inc(child);
+
+    return 0;
+}
+
+rt_err_t lwp_children_unregister(struct rt_lwp *parent, struct rt_lwp *child)
+{
+    struct rt_lwp **lwp_node;
+
+    LWP_LOCK(parent);
+    /* detach from children link */
+    lwp_node = &parent->first_child;
+    while (*lwp_node != child)
+    {
+        RT_ASSERT(*lwp_node != RT_NULL);
+        lwp_node = &(*lwp_node)->sibling;
+    }
+    (*lwp_node) = child->sibling;
+    child->parent = RT_NULL;
+    LWP_UNLOCK(parent);
+
+    LOG_D("%s(parent=%p, child=%p)", __func__, parent, child);
+    lwp_ref_dec(child);
+    lwp_ref_dec(parent);
+
+    return 0;
+}
+
+struct process_aux *argscopy(struct rt_lwp *lwp, int argc, char **argv, char **envp)
+{
+    struct lwp_args_info ai;
+    rt_err_t error;
+    struct process_aux *ua;
+    const char **tail_argv[2] = {0};
+
+    error = lwp_args_init(&ai);
+    if (error)
+    {
+        return RT_NULL;
+    }
+
+    if (argc > 0)
+    {
+        tail_argv[0] = (void *)argv[argc - 1];
+        argv[argc - 1] = NULL;
+        lwp_args_put(&ai, (void *)argv, LWP_ARGS_TYPE_KARG);
+        lwp_args_put(&ai, (void *)tail_argv, LWP_ARGS_TYPE_KARG);
+    }
+    lwp_args_put(&ai, (void *)envp, LWP_ARGS_TYPE_KENVP);
+
+    ua = lwp_argscopy(lwp, &ai);
+    lwp_args_detach(&ai);
+
+    return ua;
+}
+
+pid_t lwp_execve(char *filename, int debug, int argc, char **argv, char **envp)
+{
     int result;
+    struct rt_lwp *lwp;
+    char *thread_name;
+    struct process_aux *aux;
+    int tid = 0;
 
     if (filename == RT_NULL)
-        return -RT_ERROR;
+    {
+        return -EINVAL;
+    }
 
-    lwp = (struct rt_lwp *)rt_malloc(sizeof(struct rt_lwp));
+    if (access(filename, X_OK) != 0)
+    {
+        return -EACCES;
+    }
+
+    lwp = lwp_create(LWP_CREATE_FLAG_ALLOC_PID | LWP_CREATE_FLAG_NOTRACE_EXEC);
+
     if (lwp == RT_NULL)
     {
-        dbg_log(DBG_ERROR, "lwp struct out of memory!\n");
-        return -RT_ENOMEM;
+        LOG_E("lwp struct out of memory!\n");
+        return -ENOMEM;
     }
-    dbg_log(DBG_INFO, "lwp malloc : %p, size: %d!\n", lwp, sizeof(struct rt_lwp));
+    LOG_D("lwp malloc : %p, size: %d!", lwp, sizeof(struct rt_lwp));
 
-    rt_memset(lwp, 0, sizeof(*lwp));
-    if (lwp_argscopy(lwp, argc, argv) != 0)
+    if ((tid = lwp_tid_get()) == 0)
     {
-        rt_free(lwp);
+        lwp_ref_dec(lwp);
+        return -ENOMEM;
+    }
+#ifdef ARCH_MM_MMU
+    if (lwp_user_space_init(lwp, 0) != 0)
+    {
+        lwp_tid_put(tid);
+        lwp_ref_dec(lwp);
+        return -ENOMEM;
+    }
+#endif
+
+    if ((aux = argscopy(lwp, argc, argv, envp)) == RT_NULL)
+    {
+        lwp_tid_put(tid);
+        lwp_ref_dec(lwp);
         return -ENOMEM;
     }
 
-    result = lwp_load(filename, lwp, RT_NULL, 0);
+    result = lwp_load(filename, lwp, RT_NULL, 0, aux);
     if (result == RT_EOK)
     {
-        rt_thread_t tid;
+        rt_thread_t thread = RT_NULL;
+        rt_uint32_t priority = 25, tick = 200;
 
-        tid = rt_thread_create("user", lwp_thread, (void *)lwp,
-                               1024 * 4, 2, 200);
-        if (tid != RT_NULL)
+        lwp_execve_setup_stdio(lwp);
+
+        /* obtain the base name */
+        thread_name = strrchr(filename, '/');
+        thread_name = thread_name ? thread_name + 1 : filename;
+#ifndef ARCH_MM_MMU
+        struct lwp_app_head *app_head = lwp->text_entry;
+        if (app_head->priority)
         {
-            dbg_log(DBG_LOG, "lwp kernel => (0x%08x, 0x%08x)\n", (rt_uint32_t)tid->stack_addr, (rt_uint32_t)tid->stack_addr + tid->stack_size);
-            rt_thread_startup(tid);
-            return RT_EOK;
+            priority = app_head->priority;
         }
-        else
+        if (app_head->tick)
         {
-#ifdef RT_USING_CACHE
-            rt_free_align(lwp->text_entry);
-#else
-            rt_free(lwp->text_entry);
-#endif
-            rt_free(lwp->data);
+            tick = app_head->tick;
+        }
+#endif /* not defined ARCH_MM_MMU */
+        thread = rt_thread_create(thread_name, _lwp_thread_entry, RT_NULL,
+                LWP_TASK_STACK_SIZE, priority, tick);
+        if (thread != RT_NULL)
+        {
+            struct rt_lwp *self_lwp;
+            rt_session_t session;
+            rt_processgroup_t group;
+
+            thread->tid = tid;
+            lwp_tid_set_thread(tid, thread);
+            LOG_D("lwp kernel => (0x%08x, 0x%08x)\n", (rt_size_t)thread->stack_addr,
+                    (rt_size_t)thread->stack_addr + thread->stack_size);
+            self_lwp = lwp_self();
+
+            /* when create init, self_lwp == null */
+            if (self_lwp == RT_NULL && lwp_to_pid(lwp) != 1)
+            {
+                self_lwp = lwp_from_pid_and_lock(1);
+            }
+
+            if (self_lwp)
+            {
+                /* lwp add to children link */
+                lwp_children_register(self_lwp, lwp);
+            }
+
+            session = RT_NULL;
+            group = RT_NULL;
+
+            group = lwp_pgrp_create(lwp);
+            if (group)
+            {
+                lwp_pgrp_insert(group, lwp);
+                if (self_lwp == RT_NULL)
+                {
+                    session = lwp_session_create(lwp);
+                    lwp_session_insert(session, group);
+                }
+                else
+                {
+                    session = lwp_session_find(lwp_sid_get_byprocess(self_lwp));
+                    lwp_session_insert(session, group);
+                }
+            }
+
+            thread->lwp = lwp;
+#ifndef ARCH_MM_MMU
+            struct lwp_app_head *app_head = (struct lwp_app_head*)lwp->text_entry;
+            thread->user_stack = app_head->stack_offset ?
+                              (void *)(app_head->stack_offset -
+                                       app_head->data_offset +
+                                       (uint32_t)lwp->data_entry) : RT_NULL;
+            thread->user_stack_size = app_head->stack_size;
+            /* init data area */
+            rt_memset(lwp->data_entry, 0, lwp->data_size);
+            /* init user stack */
+            rt_memset(thread->user_stack, '#', thread->user_stack_size);
+#endif /* not defined ARCH_MM_MMU */
+            rt_list_insert_after(&lwp->t_grp, &thread->sibling);
+
+            lwp->did_exec = RT_TRUE;
+
+            if (debug && rt_dbg_ops)
+            {
+                lwp->debug = debug;
+                rt_thread_control(thread, RT_THREAD_CTRL_BIND_CPU, (void*)0);
+            }
+
+            rt_thread_startup(thread);
+            return lwp_to_pid(lwp);
         }
     }
 
-    rt_free(lwp->args);
-    rt_free(lwp);
+    lwp_tid_put(tid);
+    lwp_ref_dec(lwp);
 
     return -RT_ERROR;
+}
+
+#ifdef RT_USING_MUSLLIBC
+extern char **__environ;
+#else
+char **__environ = 0;
+#endif
+
+pid_t exec(char *filename, int debug, int argc, char **argv)
+{
+    setenv("OS", "RT-Thread", 1);
+    return lwp_execve(filename, debug, argc, argv, __environ);
+}
+
+#ifdef ARCH_MM_MMU
+void lwp_user_setting_save(rt_thread_t thread)
+{
+    if (thread)
+    {
+        thread->thread_idr = arch_get_tidr();
+    }
+}
+
+void lwp_user_setting_restore(rt_thread_t thread)
+{
+    if (!thread)
+    {
+        return;
+    }
+#if !defined(ARCH_RISCV64)
+    /* tidr will be set in RESTORE_ALL in risc-v */
+    arch_set_tidr(thread->thread_idr);
+#endif
+
+    if (rt_dbg_ops)
+    {
+        struct rt_lwp *l = (struct rt_lwp *)thread->lwp;
+
+        if (l != 0)
+        {
+            rt_hw_set_process_id((size_t)l->pid);
+        }
+        else
+        {
+            rt_hw_set_process_id(0);
+        }
+        if (l && l->debug)
+        {
+            uint32_t step_type = 0;
+
+            step_type = dbg_step_type();
+
+            if ((step_type == 2) || (thread->step_exec && (step_type == 1)))
+            {
+                dbg_activate_step();
+            }
+            else
+            {
+                dbg_deactivate_step();
+            }
+        }
+    }
+}
+#endif /* ARCH_MM_MMU */
+
+void lwp_uthread_ctx_save(void *ctx)
+{
+    rt_thread_t thread;
+    thread = rt_thread_self();
+    thread->user_ctx.ctx = ctx;
+}
+
+void lwp_uthread_ctx_restore(void)
+{
+    rt_thread_t thread;
+    thread = rt_thread_self();
+    thread->user_ctx.ctx = RT_NULL;
+}
+
+rt_err_t lwp_backtrace_frame(rt_thread_t uthread, struct rt_hw_backtrace_frame *frame)
+{
+    rt_err_t rc = -RT_ERROR;
+    long nesting = 0;
+    char **argv;
+    rt_lwp_t lwp;
+
+    if (uthread && uthread->lwp && rt_scheduler_is_available())
+    {
+        lwp = uthread->lwp;
+        argv = lwp_get_command_line_args(lwp);
+        if (argv)
+        {
+            rt_kprintf("please use: addr2line -e %s -a -f\n", argv[0]);
+            lwp_free_command_line_args(argv);
+        }
+        else
+        {
+            rt_kprintf("please use: addr2line -e %s -a -f\n", lwp->cmd);
+        }
+
+        while (nesting < RT_BACKTRACE_LEVEL_MAX_NR)
+        {
+            rt_kprintf(" 0x%lx", frame->pc);
+            if (rt_hw_backtrace_frame_unwind(uthread, frame))
+            {
+                break;
+            }
+            nesting++;
+        }
+        rt_kprintf("\n");
+        rc = RT_EOK;
+    }
+    return rc;
 }

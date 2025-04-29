@@ -25,7 +25,7 @@
  */
 
 #include <rtthread.h>
-#include <drivers/pin.h>
+#include <drivers/dev_pin.h>
 
 #define MP_HAL_PIN_FMT                 "%s"
 

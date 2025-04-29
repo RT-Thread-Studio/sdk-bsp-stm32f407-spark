@@ -12,7 +12,6 @@
 #define __UTEST_H__
 
 #include <rtthread.h>
-#include <stdint.h>
 #include "utest_log.h"
 #include "utest_assert.h"
 
@@ -136,9 +135,23 @@ utest_t utest_handle_get(void);
  * @return None
  *
 */
+#ifdef _MSC_VER
+#pragma section("UtestTcTab$f",read)
 #define UTEST_TC_EXPORT(testcase, name, init, cleanup, timeout)                \
-    RT_USED static const struct utest_tc_export _utest_testcase                \
-    RT_SECTION("UtestTcTab") =                                                    \
+    __declspec(allocate("UtestTcTab$f"))                                       \
+    static const struct utest_tc_export _utest_testcase =                      \
+    {                                                                          \
+        name,                                                                  \
+        timeout,                                                               \
+        init,                                                                  \
+        testcase,                                                              \
+        cleanup                                                                \
+     }
+#pragma comment(linker, "/merge:UtestTcTab=tctext")
+#else
+#define UTEST_TC_EXPORT(testcase, name, init, cleanup, timeout)                \
+    rt_used static const struct utest_tc_export _utest_testcase                \
+    rt_section("UtestTcTab") =                                                 \
     {                                                                          \
         name,                                                                  \
         timeout,                                                               \
@@ -146,6 +159,7 @@ utest_t utest_handle_get(void);
         testcase,                                                              \
         cleanup                                                                \
     }
+#endif /* _MSC_VER */
 
 /**
  * UTEST_UNIT_RUN
@@ -158,9 +172,12 @@ utest_t utest_handle_get(void);
  * @return None
  *
 */
-#define UTEST_UNIT_RUN(test_unit_func)                                         \
-    utest_unit_run(test_unit_func, #test_unit_func);                           \
-    if(utest_handle_get()->failed_num != 0) return;
+#define _UTEST_UNIT_RUN(test_unit_func)                   \
+    do {                                                 \
+        utest_unit_run(test_unit_func, #test_unit_func); \
+    } while (0)
+
+#define UTEST_UNIT_RUN(test_unit_func) _UTEST_UNIT_RUN(test_unit_func)
 
 #ifdef __cplusplus
 }

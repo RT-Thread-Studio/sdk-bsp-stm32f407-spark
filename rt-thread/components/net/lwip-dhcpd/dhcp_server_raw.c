@@ -1,7 +1,7 @@
 /*
  * File      : dhcp_server_raw.c
  *             A simple DHCP server implementation
- * COPYRIGHT (C) 2011-2018, Shanghai Real-Thread Technology Co., Ltd
+ * COPYRIGHT (C) 2011-2023, Shanghai Real-Thread Technology Co., Ltd
  * http://www.rt-thread.com
  * All rights reserved.
  *
@@ -161,8 +161,7 @@ dhcp_client_find_by_mac(struct dhcp_server *dhcpserver, const u8_t *chaddr, u8_t
 * Find a dhcp client node by ip address
 *
 * @param dhcpserver The dhcp server
-* @param chaddr Mac address
-* @param hlen   Mac address length
+* @param ip IP address
 * @return dhcp client node
 */
 static struct dhcp_client_node *
@@ -182,11 +181,12 @@ dhcp_client_find_by_ip(struct dhcp_server *dhcpserver, const ip4_addr_t *ip)
 }
 
 /**
-* Find a dhcp client node by ip address
+* Find a dhcp client node by dhcp message
 *
-* @param dhcpserver The dhcp server
-* @param chaddr Mac address
-* @param hlen   Mac address length
+* @param dhcpserver is the dhcp server
+* @param msg is the dhcp message
+* @param opt_buf is the optional buffer
+* @param len is the buffer length
 * @return dhcp client node
 */
 static struct dhcp_client_node *
@@ -217,11 +217,12 @@ dhcp_client_find(struct dhcp_server *dhcpserver, struct dhcp_msg *msg,
 }
 
 /**
-* Find a dhcp client node by ip address
+* Allocate a dhcp client node by dhcp message
 *
-* @param dhcpserver The dhcp server
-* @param chaddr Mac address
-* @param hlen   Mac address length
+* @param dhcpserver is the dhcp server
+* @param msg is the dhcp message
+* @param opt_buf is the optional buffer
+* @param len is the buffer length
 * @return dhcp client node
 */
 static struct dhcp_client_node *
@@ -604,7 +605,7 @@ free_pbuf_and_return:
 *
 * @param netif The netif which use dhcp server
 * @param start The Start IP address
-* @param end The netif which use dhcp server
+* @param end The End IP address
 * @return lwIP error code
 * - ERR_OK - No error
 * - ERR_MEM - Out of memory
@@ -735,7 +736,7 @@ void dhcpd_start(const char *netif_name)
         DEBUG_PRINTF("ip_start: [%s]\r\n", str_tmp);
         sprintf(p, "%d", DHCPD_CLIENT_IP_MAX);
         ip4addr_aton(str_tmp, &ip_end);
-        DEBUG_PRINTF("ip_start: [%s]\r\n", str_tmp);
+        DEBUG_PRINTF("ip_end: [%s]\r\n", str_tmp);
 
         res = dhcp_server_start(netif, &ip_start, &ip_end);
         if (res != 0)

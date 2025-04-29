@@ -36,9 +36,9 @@
 #if MICROPY_PY_WLAN
 #include <rtdbg.h>
 #include <rtthread.h>
-#include <wlan_mgnt.h>
-#include <wlan_cfg.h>
-#include <wlan_prot.h>
+#include <dev_wlan_mgnt.h>
+#include <dev_wlan_cfg.h>
+#include <dev_wlan_prot.h>
 #include <arpa/inet.h>
 #include <netdev.h>     
 #include "modnetwork.h"
@@ -209,9 +209,9 @@ STATIC mp_obj_t wlan_status(size_t n_args, const mp_obj_t *args) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(wlan_status_obj, 1, 2, wlan_status);
 
 #if (RTTHREAD_VERSION >= RT_VERSION_CHECK(4, 1, 0)) && defined(RT_USING_WIFI)
-#include <wlan_mgnt.h>
-#include <wlan_prot.h>
-#include <wlan_cfg.h>
+#include <dev_wlan_mgnt.h>
+#include <dev_wlan_prot.h>
+#include <dev_wlan_cfg.h>
 
 static struct rt_semaphore scan_done;
 struct rt_wlan_scan_result *scan_result_cache = RT_NULL;

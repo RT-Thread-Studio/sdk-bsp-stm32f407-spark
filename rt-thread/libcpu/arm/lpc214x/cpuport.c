@@ -16,7 +16,7 @@
 #define MAX_HANDLERS    32
 #define SVCMODE         0x13
 
-extern rt_uint32_t rt_interrupt_nest;
+extern rt_atomic_t rt_interrupt_nest;
 
 /* exception and interrupt handler table */
 struct rt_irq_desc irq_desc[MAX_HANDLERS];
@@ -157,25 +157,6 @@ rt_isr_handler_t rt_hw_interrupt_install(int vector, rt_isr_handler_t handler,
     }
 
     return old_handler;
-}
-
-/**
- * this function will reset CPU
- *
- */
-RT_WEAK void rt_hw_cpu_reset(void)
-{
-}
-
-/**
- * this function will shutdown CPU
- *
- */
-RT_WEAK void rt_hw_cpu_shutdown()
-{
-    rt_kprintf("shutdown...\n");
-
-    while (1);
 }
 
 void rt_hw_trap_irq(void)

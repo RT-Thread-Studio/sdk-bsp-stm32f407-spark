@@ -13,7 +13,7 @@
 #include <board.h>
 
 #define DBG_TAG "main"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 /* 配置 LED 灯引脚 */
