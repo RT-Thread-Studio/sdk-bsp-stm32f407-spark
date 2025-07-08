@@ -15,6 +15,11 @@ config PKGS_DIR
     option env="PKGS_ROOT"
     default "packages"
 
+config PLATFORM_DIR
+    string
+    option env="PLATFORM_DIR"
+    default "C:/Users/RTT/Documents/projects/RT-Thread-Studio/sdk-bsp-stm32f407-spark/projects/05_iot_mbedtls/platform"
+
 source "$RTT_DIR/Kconfig"
 source "$PKGS_DIR/Kconfig"
 source "$RTT_DIR/../libraries/Kconfig"

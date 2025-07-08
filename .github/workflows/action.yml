@@ -1,0 +1,119 @@
+name: RT-SPARK
+
+on:
+  # Runs at 16:00 UTC (BeiJing 00:00) on the 1st of every month
+  schedule:
+    - cron:  '0 16 1 * *'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - documenation/**
+      - '**/README.md'
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - documenation/**
+      - '**/README.md'
+env:
+  RTT_TOOL_CHAIN: "sourcery-arm"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    name: check-yaml-format
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.8
+
+      - name: Check yaml
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          pip install rt-thread-studio
+          python -c "from rt_thread_studio import bsp_checker;bsp_path = '.';checker = bsp_checker.BspChecker(bsp_path);checker.check();"
+
+  compile:
+    needs: [check]
+    runs-on: ubuntu-latest
+    name: ${{ matrix.legs.RTT_BSP }}
+    strategy:
+      fail-fast: false
+      matrix:
+       legs:
+         - {RTT_BSP: "01_kernel"}
+         - {RTT_BSP: "02_basic_ir"}
+         - {RTT_BSP: "02_basic_irq_beep"}
+         - {RTT_BSP: "02_basic_key"}
+         - {RTT_BSP: "02_basic_led_blink"}
+         - {RTT_BSP: "02_basic_rgb_led"}
+         - {RTT_BSP: "02_basic_rtc"}
+         - {RTT_BSP: "03_driver_als_ps"}
+         - {RTT_BSP: "03_driver_axis"}
+         - {RTT_BSP: "03_driver_can"}
+         - {RTT_BSP: "03_driver_lcd"}
+         - {RTT_BSP: "03_driver_led_matrix"}
+         - {RTT_BSP: "03_driver_temp_humi"}
+         - {RTT_BSP: "04_component_fal"}
+         - {RTT_BSP: "04_component_fs_flash"}
+         - {RTT_BSP: "04_component_fs_tf_card"}
+         - {RTT_BSP: "04_component_kv"}
+         - {RTT_BSP: "04_component_pm"}
+         - {RTT_BSP: "04_component_usb_mouse"}
+         - {RTT_BSP: "05_iot_cloud_ali_iotkit"}
+         - {RTT_BSP: "05_iot_cloud_onenet"}
+         - {RTT_BSP: "05_iot_http_client"}
+         - {RTT_BSP: "05_iot_mbedtls"}
+         - {RTT_BSP: "05_iot_mqtt"}
+         - {RTT_BSP: "05_iot_netutils"}
+         - {RTT_BSP: "05_iot_ota_http"}
+         - {RTT_BSP: "05_iot_ota_ymodem"}
+         - {RTT_BSP: "05_iot_web_server"}
+         - {RTT_BSP: "05_iot_wifi_manager"}
+         - {RTT_BSP: "06_demo_factory"}
+         - {RTT_BSP: "06_demo_lvgl"}
+         - {RTT_BSP: "06_demo_micropython"}
+         - {RTT_BSP: "06_demo_nes_simulator"}
+         - {RTT_BSP: "06_demo_rs485_led_matrix"}
+         - {RTT_BSP: "06_demo_wavplayer"}
+         - {RTT_BSP: "07_module_key_matrix"}
+         - {RTT_BSP: "07_module_spi_eth_enc28j60"}
+         - {RTT_BSP: "07_module_ultrasonic_sr04"}
+         - {RTT_BSP: "07_module_ws2812_led"}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.8
+
+      - name: Install Arm ToolChains
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          wget -c https://github.com/RT-Thread/toolchains-ci/releases/download/v1.8/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+          sudo tar -xf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
+          /opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc --version
+          echo "RTT_EXEC_PATH=/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
+
+      - name: Install Tools
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get -qq install gcc-multilib libsdl2-dev scons
+          echo "RTT_ROOT=${{ github.workspace }}" >> $GITHUB_ENV
+          echo "RTT_CC=gcc" >> $GITHUB_ENV
+
+      - name: Compile ${{ matrix.legs.RTT_BSP }}
+        if: ${{ success() }}
+        shell: bash
+        env:
+          RTT_BSP: ${{ matrix.legs.RTT_BSP }}
+        run: |
+          cd projects
+          scons -C $RTT_BSP

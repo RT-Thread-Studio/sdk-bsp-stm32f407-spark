@@ -15,6 +15,11 @@ config PKGS_DIR
     option env="PKGS_ROOT"
     default "packages"
 
+config PLATFORM_DIR
+    string
+    option env="PLATFORM_DIR"
+    default  "C:/Softwares/RT-ThreadStudio/workspace/Spark_5.1.0/05_iot_mqtt/platform"
+
 source "$RTT_DIR/Kconfig"
 source "$PKGS_DIR/Kconfig"
 source "$RTT_DIR/../libraries/Kconfig"

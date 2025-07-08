@@ -16,17 +16,17 @@ onenet 例程需要依赖 星火 1 号 板卡上的 WiFi 模块完成网络通�
 
 ### 创建产品
 
-onenet 用来管理设备的网址为 [产品管理](https://open.iot.10086.cn/develop/global/product/#/public?protocol=3&amp;other=1) 点击添加产品来添加一个产品
+onenet 用来管理设备的网址为 [产品管理](https://open.iot.10086.cn/console/product/own) 点击创建产品来添加一个产品
 
 产品配置如图
 
-![创建产品](./figures/product.png)
+![image-20250429101733225](figures/image-20250429101733225.png)
 
 ### 创建设备
 
 点击进入产品，点击设备列表，点击添加设备。设备配置信息如下：
 
-![创建设备](./figures/device.png)
+![image-20250429101827226](figures/image-20250429101827226.png)
 
 ### 代码移植
 
@@ -34,7 +34,7 @@ onenet 用来管理设备的网址为 [产品管理](https://open.iot.10086.cn/d
 
 双击 RT-Thread Settings，点击 OneNet 软件包进行配置
 
-![OneNet 配置](./figures/onenet_setting.png)
+![image-20250429095304161](figures/image-20250429095304161.png)
 
 设备信息和软件包配置映射如下表
 
@@ -42,15 +42,29 @@ onenet 用来管理设备的网址为 [产品管理](https://open.iot.10086.cn/d
 | ------------- | ------------- |
 | 设备 ID        | 设备 ID        |
 | 身份验证信息  | 鉴权信息      |
-| API 秘钥       | APIKey        |
 | 产品 ID        | 产品 ID        |
-| 主/产品 APIKEY | Master-APIkey |
 
 对应信息在 OneNet 中查找
 
-![产品 ID 位置](./figures/product_id.png)
+![image-20250429101248096](figures/image-20250429101248096.png)
 
-![设备信息位置](./figures/device_info.png)
+**鉴权信息生成**
+
+鉴权信息通过onenet软件包的tools目录下的token.exe软件生成
+
+![image-20250429100357183](figures/image-20250429100357183.png)
+
+token生成器参数和onenet软件包信息映射如下表
+
+| token生成器参数 | onenet 对应信息 |
+| ------------- | ------------- |
+| res | products/{产品ID}/devices/{设备ID} |
+| et  | 时间戳   |
+| key   | 设备密钥    |
+
+复制生成的鉴权信息粘贴到`rtconfig.h`的`ONENET_INFO_AUTH`字段后面
+
+![image-20250429100918346](figures/image-20250429100918346.png)
 
 ## 软件说明
 
@@ -241,16 +255,17 @@ msh />[I/mqtt] MQTT server connect success.
 
 ```shell
 msh />onenet_upload_cycle
-[D/onenet.sample] buffer : {"temperature":52}
-msh />[D/onenet.sample] buffer : {"temperature":56}
-[D/onenet.sample] buffer : {"temperature":56}
-[D/onenet.sample] buffer : {"temperature":19}
-[D/onenet.sample] buffer : {"temperature":11}
+[D/onenet.sample] buffer : {"Brightness":52}
+msh />[D/onenet.sample] buffer : {"Brightness":56}
+[D/onenet.sample] buffer : {"Brightness":56}
+[D/onenet.sample] buffer : {"Brightness":19}
+[D/onenet.sample] buffer : {"Brightness":11}
+[D/onenet.sample] buffer : {"Brightness":69}
 ```
 
-打开 OneNET 平台，在**设备列表**页面，选择**数据流展示**，点击展开 temperature 数据流，可以看到刚刚上传的数据信息。
+打开 OneNET 平台，在**设备列表**页面，选择**属性**，可以看到刚刚上传的数据信息。
 
-![temperature 数据流](./figures/stream.png)
+![image-20250429102007199](figures/image-20250429102007199.png)
 
 ### 命令控制
 

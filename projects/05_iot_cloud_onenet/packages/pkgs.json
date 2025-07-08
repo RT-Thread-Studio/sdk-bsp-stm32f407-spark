@@ -1,22 +1,22 @@
 [
  {
-  "path": "/packages/iot/pahomqtt", 
-  "ver": "v1.2.0", 
-  "name": "PAHOMQTT"
- }, 
+  "name": "PAHOMQTT",
+  "path": "/packages/iot/pahomqtt",
+  "ver": "latest"
+ },
  {
-  "path": "/packages/iot/WiFi/rw007", 
-  "ver": "v2.0.1", 
-  "name": "RW007"
- }, 
+  "name": "RW007",
+  "path": "/packages/iot/WiFi/rw007",
+  "ver": "v2.0.1"
+ },
  {
-  "path": "/packages/iot/iot_cloud/onenet", 
-  "ver": "latest", 
-  "name": "ONENET"
- }, 
+  "name": "ONENET",
+  "path": "/packages/iot/iot_cloud/onenet",
+  "ver": "latest"
+ },
  {
-  "path": "/packages/language/JSON/cJSON", 
-  "ver": "v1.7.15", 
-  "name": "CJSON"
+  "name": "CJSON",
+  "path": "/packages/language/JSON/cJSON",
+  "ver": "v1.7.17"
  }
 ]

@@ -1,7 +1,7 @@
 [
  {
   "path": "/packages/peripherals/sensors/aht10", 
-  "ver": "v2.1.0", 
+  "ver": "latest", 
   "name": "AHT10"
  }
 ]
