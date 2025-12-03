@@ -1,5 +1,7 @@
 import os
+import platform
 
+system_name = platform.system()
 # toolchains options
 ARCH='arm'
 CPU='cortex-m4'
@@ -15,9 +17,19 @@ if os.getenv('RTT_ROOT'):
 
 # cross_tool provides the cross compiler
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
-if  CROSS_TOOL == 'gcc':
-    PLATFORM    = 'gcc'
-    EXEC_PATH   = r'C:\Users\XXYYZZ'
+if CROSS_TOOL == "gcc":
+    PLATFORM = "gcc"
+    # Linux
+    if system_name == "Linux":
+        EXEC_PATH = r"/usr/bin"
+    # Macos
+    elif system_name == "Darwin":
+        EXEC_PATH = r"/opt/homebrew/bin/"
+    # Windows
+    elif system_name == "Windows":
+        EXEC_PATH = r"C:\Users\XXYYZZ"
+    else:
+        EXEC_PATH = r"/usr/bin"
 elif CROSS_TOOL == 'keil':
     PLATFORM    = 'armcc'
     EXEC_PATH   = r'C:/Keil_v5'
@@ -28,7 +40,7 @@ elif CROSS_TOOL == 'iar':
 if os.getenv('RTT_EXEC_PATH'):
     EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 
-BUILD = 'release'
+BUILD = 'debug'
 
 if PLATFORM == 'gcc':
     # toolchains
@@ -52,7 +64,7 @@ if PLATFORM == 'gcc':
     LPATH = ''
 
     if BUILD == 'debug':
-        CFLAGS += ' -O1 -gdwarf-2 -g'
+        CFLAGS += ' -O0 -gdwarf-2 -g'
         AFLAGS += ' -gdwarf-2'
     else:
         CFLAGS += ' -O2'
@@ -73,7 +85,7 @@ elif PLATFORM == 'armcc':
     DEVICE = ' --cpu Cortex-M4.fp '
     CFLAGS = '-c ' + DEVICE + ' --apcs=interwork --c99'
     AFLAGS = DEVICE + ' --apcs=interwork '
-    LFLAGS = DEVICE + ' --scatter "board\linker_scripts\link.sct" --info sizes --info totals --info unused --info veneers --list rt-thread.map --strict'
+    LFLAGS = DEVICE + ' --scatter "board/linker_scripts/link.sct" --info sizes --info totals --info unused --info veneers --list rt-thread.map --strict'
     CFLAGS += ' -I' + EXEC_PATH + '/ARM/ARMCC/include'
     LFLAGS += ' --libpath=' + EXEC_PATH + '/ARM/ARMCC/lib'
 
@@ -121,7 +133,6 @@ elif PLATFORM == 'armclang':
         AFLAGS += ' -g'
     else:
         CFLAGS += ' -O2'
-        
     CXXFLAGS = CFLAGS
     CFLAGS += ' -std=c99'
 
@@ -172,7 +183,6 @@ elif PLATFORM == 'iccarm':
     LFLAGS += ' --entry __iar_program_start'
 
     CXXFLAGS = CFLAGS
-    
     EXEC_PATH = EXEC_PATH + '/arm/bin/'
     POST_ACTION = 'ielftool --bin $TARGET rtthread.bin'
 
